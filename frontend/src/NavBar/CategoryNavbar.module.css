@@ -1,0 +1,42 @@
+.navbar {
+  border-top: 1px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;
+  padding: 0.5rem 2.5rem;
+  /* background-color: white; handled by parent */
+}
+
+.navItem {
+  position: relative;
+  align-items: center;
+}
+
+.megaMenu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #f8f9fa;
+  width: max-content;
+  padding: 2rem;
+  z-index: 10;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.navItem:hover .megaMenu {
+  display: block;
+}
+.menuCol {
+  min-width: 180px;
+}
+.menuTitle {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.cartIcon {
+  transition: transform 0.2s ease-in-out;
+}
+
+.cartIcon:hover {
+  transform: scale(1.1);
+  color: #dc3545;
+}

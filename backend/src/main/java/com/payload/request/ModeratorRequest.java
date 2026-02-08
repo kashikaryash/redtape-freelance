@@ -1,0 +1,59 @@
+package com.payload.request;
+
+import com.entity.Category;
+import jakarta.validation.constraints.*;
+import lombok.Data;
+
+import java.util.Set;
+
+/**
+ * Request DTO for creating or updating a Moderator.
+ */
+@Data
+public class ModeratorRequest {
+
+    /**
+     * User ID to assign as moderator.
+     * Required for creation, optional for updates.
+     */
+    @NotNull(message = "User ID is required")
+    private Long userId;
+
+    /**
+     * Categories the moderator can manage.
+     */
+    private Set<Category> categories;
+
+    /**
+     * Permission to delete user reviews.
+     */
+    private Boolean canDeleteReviews = false;
+
+    /**
+     * Permission to ban/suspend users.
+     */
+    private Boolean canBanUsers = false;
+
+    /**
+     * Permission to edit product listings.
+     */
+    private Boolean canEditProducts = false;
+
+    /**
+     * Permission to manage order disputes.
+     */
+    private Boolean canManageOrders = false;
+
+    /**
+     * Authority level (1-5).
+     */
+    @Min(value = 1, message = "Moderation level must be at least 1")
+    @Max(value = 5, message = "Moderation level cannot exceed 5")
+    private Integer moderationLevel = 1;
+
+    /**
+     * Admin notes about this moderator.
+     */
+    @Size(max = 500, message = "Notes cannot exceed 500 characters")
+    private String notes;
+}

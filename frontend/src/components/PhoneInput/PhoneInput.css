@@ -1,0 +1,179 @@
+.phone-input-container {
+    position: relative;
+    width: 100%;
+}
+
+.phone-input-wrapper {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.phone-input-wrapper:focus-within {
+    border-color: #e63946;
+    box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.15);
+}
+
+.phone-input-wrapper.has-error {
+    border-color: #dc3545;
+}
+
+.country-selector {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 12px;
+    background: #f8f9fa;
+    border: none;
+    border-right: 1px solid #ced4da;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    min-width: 110px;
+}
+
+.country-selector:hover {
+    background: #e9ecef;
+}
+
+.country-flag {
+    font-size: 1.3rem;
+    line-height: 1;
+}
+
+.country-dial {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.dropdown-arrow {
+    font-size: 0.6rem;
+    color: #666;
+    margin-left: 4px;
+}
+
+.phone-number-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: none;
+    font-size: 1rem;
+    outline: none;
+    background: white;
+}
+
+.phone-number-input::placeholder {
+    color: #adb5bd;
+}
+
+/* Dropdown Styles */
+.country-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 4px;
+    background: white;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    max-height: 320px;
+    overflow: hidden;
+    animation: dropdownFadeIn 0.2s ease;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-search {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.dropdown-search input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+.dropdown-search input:focus {
+    border-color: #e63946;
+}
+
+.country-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.country-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.country-option:hover {
+    background: #f0f7ff;
+}
+
+.country-option.selected {
+    background: #e8f4fc;
+    font-weight: 500;
+}
+
+.country-name {
+    flex: 1;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.country-dial-code {
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Error Message */
+.phone-error {
+    color: #dc3545;
+    font-size: 0.85rem;
+    margin-top: 6px;
+}
+
+/* Scrollbar Styling */
+.country-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.country-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.country-list::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.country-list::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}

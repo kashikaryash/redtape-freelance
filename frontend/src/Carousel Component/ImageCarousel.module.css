@@ -1,0 +1,47 @@
+.carouselContainer {
+  width: 100vw;
+  height: 110vh;
+  overflow: hidden;
+  position: relative;
+  background-color: #000; /* fallback bg */
+}
+
+.carouselImage {
+  width: 100%;
+  height: 110vh;
+  object-fit: fill;
+  position: absolute;
+  top: 0px;
+  left: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.control {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.4);
+  border: none;
+  color: white;
+  font-size: 2.5rem;
+  padding: 0 15px;
+  cursor: pointer;
+  z-index: 10;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.control:hover,
+.control:focus {
+  background-color: rgba(0, 0, 0, 0.7);
+  outline: none;
+}
+
+.prev {
+  left: 1rem;
+}
+
+.next {
+  right: 1rem;
+}
