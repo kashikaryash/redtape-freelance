@@ -121,16 +121,20 @@ public class ImageController {
         try {
             org.springframework.core.io.Resource resource = new org.springframework.core.io.ClassPathResource(
                     "static/assets/imagenotavailableplaceholder.png");
-            byte[] data = resource.getInputStream().readAllBytes();
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.IMAGE_PNG);
-            headers.setContentLength(data.length);
-            headers.setCacheControl("public, max-age=86400");
-
-            return new ResponseEntity<>(data, headers, HttpStatus.OK);
+            if (resource.exists()) {
+                byte[] data = resource.getInputStream().readAllBytes();
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.IMAGE_PNG);
+                headers.setContentLength(data.length);
+                headers.setCacheControl("public, max-age=86400");
+                return new ResponseEntity<>(data, headers, HttpStatus.OK);
+            }
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            // Log or ignore
         }
+        // Final fallback to a reliable public UI placeholder
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .header(HttpHeaders.LOCATION, "https://placehold.co/600x600/e2e8f0/64748b?text=Image+Not+Found")
+                .build();
     }
 }
