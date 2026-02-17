@@ -185,14 +185,13 @@
     position: absolute;
     top: 50px;
     /* Exact height of category strip */
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
+    right: 0;
     background: var(--surface-elevated);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
     border: 1px solid var(--border);
     border-top: none;
     border-radius: 0 0 16px 16px;
-    min-width: 600px;
     padding: 2rem;
     z-index: 1101;
     animation: menuFade 0.3s ease-out;
@@ -211,9 +210,9 @@
 }
 
 .mega-menu-content {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
+    display: flex;
+    justify-content: center;
+    gap: 4rem;
 }
 
 .menu-col {
