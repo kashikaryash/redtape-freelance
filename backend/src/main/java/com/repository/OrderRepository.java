@@ -10,6 +10,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findByUserId(Long userId);
 
+    long countByUserIdAndStatusNot(Long userId, com.entity.OrderStatus status);
+
     Order findTopByUserOrderByOrderDateDesc(User user);
 
     @org.springframework.data.jpa.repository.Query("SELECT SUM(o.totalAmount) FROM Order o")

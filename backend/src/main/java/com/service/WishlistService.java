@@ -40,10 +40,7 @@ public class WishlistService {
 
         // Check if already exists
         boolean exists = wishlist.getItems().stream()
-                .anyMatch(item -> productModelNo != null && item.getProduct().getModelNo() == productModelNo); // Using
-                                                                                                               // primitive
-                                                                                                               // long
-                                                                                                               // comparison
+                .anyMatch(item -> item.getProduct().getModelNo().equals(productModelNo));
 
         if (!exists) {
             WishlistItem item = new WishlistItem();
@@ -61,7 +58,7 @@ public class WishlistService {
         Wishlist wishlist = getWishlistByUser(user);
 
         wishlist.getItems()
-                .removeIf(item -> productModelNo != null && item.getProduct().getModelNo() == productModelNo);
+                .removeIf(item -> item.getProduct().getModelNo().equals(productModelNo));
 
         return wishlistRepository.save(wishlist);
     }

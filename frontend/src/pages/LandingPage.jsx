@@ -293,7 +293,7 @@ const LandingPage = () => {
                             Get 20% Off Your First Order
                         </Typography>
                         <Typography variant="h6" sx={{ mb: 4, opacity: 0.8 }}>
-                            Join the SOLECRAFT family and step up your sneaker game.
+                            Join the SnapCart family and step up your sneaker game.
                         </Typography>
                         <Button
                             variant="contained"
@@ -325,7 +325,7 @@ const LandingPage = () => {
                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                                 <DirectionsRun sx={{ fontSize: 36, color: '#e63946', mr: 1 }} />
                                 <Typography variant="h5" sx={{ fontWeight: 800 }}>
-                                    SOLECRAFT
+                                    SnapCart
                                 </Typography>
                             </Box>
                             <Typography sx={{ opacity: 0.7, lineHeight: 1.8 }}>
@@ -383,7 +383,7 @@ const LandingPage = () => {
                     </Grid>
                     <Box sx={{ borderTop: '1px solid rgba(255,255,255,0.1)', mt: 6, pt: 4, textAlign: 'center' }}>
                         <Typography sx={{ opacity: 0.5 }}>
-                            © 2024 SOLECRAFT. All rights reserved.
+                            © 2026 SnapCart. All rights reserved.
                         </Typography>
                     </Box>
                 </Container>

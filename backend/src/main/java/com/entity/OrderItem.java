@@ -18,10 +18,10 @@ public class OrderItem {
     @JsonIgnore
     private Order order;
 
-    // Product reference
+    // Variant reference
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_model_no", referencedColumnName = "modelNo", nullable = false)
-    private Product product;
+    @JoinColumn(name = "variant_id", nullable = false)
+    private ProductVariant variant;
 
     @Column(nullable = false)
     private int quantity;

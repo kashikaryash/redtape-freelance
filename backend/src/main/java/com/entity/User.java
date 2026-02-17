@@ -46,6 +46,9 @@ public class User {
     @Column(length = 50)
     private String profilePictureType;
 
+    @Column(columnDefinition = "TEXT")
+    private String paymentInfo;
+
     // Helper to check if user has profile picture
     public boolean hasProfilePicture() {
         return profilePicture != null && profilePicture.length > 0;

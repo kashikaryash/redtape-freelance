@@ -1,6 +1,6 @@
 package com.controller.admin;
 
-import com.entity.Product;
+import com.entity.ProductVariant;
 import com.service.InventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +14,11 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/admin/inventory")
 @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+@org.springframework.transaction.annotation.Transactional(readOnly = true)
 public class InventoryController {
+
+    @Autowired
+    private com.mapper.ProductMapper productMapper;
 
     @Autowired
     private InventoryService inventoryService;
@@ -24,52 +28,51 @@ public class InventoryController {
      */
     @GetMapping("/summary")
     public ResponseEntity<Map<String, Object>> getInventorySummary() {
-        List<Product> lowStock = inventoryService.getLowStockProducts();
-        List<Product> outOfStock = inventoryService.getOutOfStockProducts();
+        List<ProductVariant> lowStock = inventoryService.getLowStockVariants();
+        List<ProductVariant> outOfStock = inventoryService.getOutOfStockVariants();
 
         Map<String, Object> summary = new HashMap<>();
         summary.put("lowStockCount", lowStock.size());
         summary.put("outOfStockCount", outOfStock.size());
-        summary.put("lowStockProducts", lowStock);
-        summary.put("outOfStockProducts", outOfStock);
+        // summary.put("lowStockVariants", lowStock); // might be too large
+        // summary.put("outOfStockVariants", outOfStock);
 
         return ResponseEntity.ok(summary);
     }
 
-    /**
-     * Get all low stock products
-     */
     @GetMapping("/low-stock")
-    public ResponseEntity<List<Product>> getLowStockProducts() {
-        return ResponseEntity.ok(inventoryService.getLowStockProducts());
+    public ResponseEntity<List<com.payload.response.ProductVariantDTO>> getLowStockVariants() {
+        return ResponseEntity
+                .ok(inventoryService.getLowStockVariants().stream().map(productMapper::toVariantDTO).toList());
     }
 
-    /**
-     * Get all out of stock products
-     */
     @GetMapping("/out-of-stock")
-    public ResponseEntity<List<Product>> getOutOfStockProducts() {
-        return ResponseEntity.ok(inventoryService.getOutOfStockProducts());
+    public ResponseEntity<List<com.payload.response.ProductVariantDTO>> getOutOfStockVariants() {
+        return ResponseEntity
+                .ok(inventoryService.getOutOfStockVariants().stream().map(productMapper::toVariantDTO).toList());
     }
 
     /**
-     * Update stock quantity
+     * Update stock quantity (Variant ID)
      */
-    @PutMapping("/{productId}/stock")
-    public ResponseEntity<Product> updateStock(
-            @PathVariable Long productId,
+    @PutMapping("/{variantId}/stock")
+    @org.springframework.transaction.annotation.Transactional
+    public ResponseEntity<com.payload.response.ProductVariantDTO> updateStock(
+            @PathVariable Long variantId,
             @RequestParam int quantity) {
-        return ResponseEntity.ok(inventoryService.updateStock(productId, quantity));
+        return ResponseEntity.ok(productMapper.toVariantDTO(inventoryService.updateStock(variantId, quantity)));
     }
 
     /**
-     * Update low stock threshold
+     * Update low stock threshold (Product ID)
      */
-    @PutMapping("/{productId}/threshold")
-    public ResponseEntity<Product> updateThreshold(
+    @PutMapping("/product/{productId}/threshold")
+    @org.springframework.transaction.annotation.Transactional
+    public ResponseEntity<com.payload.response.ProductResponse> updateThreshold(
             @PathVariable Long productId,
             @RequestParam int threshold) {
-        return ResponseEntity.ok(inventoryService.updateLowStockThreshold(productId, threshold));
+        return ResponseEntity
+                .ok(productMapper.toResponse(inventoryService.updateLowStockThreshold(productId, threshold)));
     }
 
     /**
@@ -82,9 +85,10 @@ public class InventoryController {
 
         for (Map<String, Object> update : updates) {
             try {
-                Long productId = Long.valueOf(update.get("productId").toString());
+                // Expecting "variantId" now
+                Long variantId = Long.valueOf(update.get("variantId").toString());
                 int quantity = Integer.parseInt(update.get("quantity").toString());
-                inventoryService.updateStock(productId, quantity);
+                inventoryService.updateStock(variantId, quantity);
                 successCount++;
             } catch (Exception e) {
                 failCount++;
@@ -92,7 +96,7 @@ public class InventoryController {
         }
 
         Map<String, String> result = new HashMap<>();
-        result.put("message", String.format("Updated %d products, %d failed", successCount, failCount));
+        result.put("message", String.format("Updated %d variants, %d failed", successCount, failCount));
         return ResponseEntity.ok(result);
     }
 }

@@ -23,7 +23,18 @@ public class CouponController {
             @RequestParam String code,
             @RequestParam double orderAmount) {
 
-        CouponService.CouponValidationResult result = couponService.validateCoupon(code, orderAmount);
+        Long userId = null;
+        try {
+            com.service.UserDetailsImpl userDetails = (com.service.UserDetailsImpl) org.springframework.security.core.context.SecurityContextHolder
+                    .getContext()
+                    .getAuthentication()
+                    .getPrincipal();
+            userId = userDetails.getId();
+        } catch (Exception e) {
+            // Not logged in
+        }
+
+        CouponService.CouponValidationResult result = couponService.validateCoupon(code, orderAmount, userId);
 
         Map<String, Object> response = new HashMap<>();
         response.put("valid", result.isValid());

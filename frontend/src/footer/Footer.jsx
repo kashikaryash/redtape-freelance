@@ -23,14 +23,14 @@ const Footer = () => {
     <Box component="footer" sx={{ bgcolor: 'background.paper', pt: 8, pb: 4, mt: 'auto', borderTop: 1, borderColor: 'divider' }}>
       <Container maxWidth="lg">
         <Grid container spacing={4} justifyContent="space-between">
-
+          {/* enum('MEN','WOMEN','KIDS','ELECTRONICS','HOME_KITCHEN','BEAUTY','ACCESSORIES','JEWELLERY','BAGS_FOOTWEAR') */}
           {/* Shop */}
           <Grid item xs={6} md={3}>
             <Typography variant="h6" color="text.primary" gutterBottom fontWeight="bold">
               Shop
             </Typography>
             <Box component="ul" sx={{ m: 0, p: 0, listStyle: 'none' }}>
-              {['Men', 'Women', 'Kids', 'Accessories'].map((item) => (
+              {['MEN', 'WOMEN', 'KIDS', 'ELECTRONICS', 'HOME_KITCHEN', 'BEAUTY', 'ACCESSORIES', 'JEWELLERY', 'BAGS_FOOTWEAR'].map((item) => (
                 <Box component="li" key={item} sx={{ mb: 1 }}>
                   <Link href="#" variant="body2" color="text.secondary" underline="hover">
                     {item}

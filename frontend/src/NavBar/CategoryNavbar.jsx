@@ -9,7 +9,7 @@ const CategoryNavbar = () => {
 
   const renderMenu = (category) => {
     switch (category) {
-      case "Men":
+      case "MEN":
         return (
           <>
             <div className={styles.menuCol}>
@@ -67,7 +67,7 @@ const CategoryNavbar = () => {
     <nav className={`navbar navbar-expand ${styles.navbar}`}>
       <div className="container-fluid justify-content-between">
         <div className="d-flex justify-content-center w-100 gap-5">
-          {["Men", "Women", "Kids"].map((category) => (
+          {["MEN", "WOMEN", "KIDS"].map((category) => (
             <div
               key={category}
               className={styles.navItem}

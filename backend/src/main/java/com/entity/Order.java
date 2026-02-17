@@ -29,6 +29,9 @@ public class Order {
     private double totalAmount;
 
     @Column(nullable = false)
+    private double discount = 0.0;
+
+    @Column(nullable = false)
     private LocalDateTime orderDate;
 
     @Enumerated(EnumType.STRING)
@@ -40,9 +43,23 @@ public class Order {
 
     private String paymentMethod;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PaymentStatus paymentStatus;
+
+    @Column(length = 255)
+    private String paymentReference; // Transaction ID from payment gateway
+
+    @Column(length = 255)
+    private String currentLocation;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderTracking> trackingHistory = new ArrayList<>();
+
     @PrePersist
     protected void onCreate() {
         this.orderDate = LocalDateTime.now();
         this.status = OrderStatus.PENDING;
+        this.paymentStatus = PaymentStatus.PENDING;
     }
 }

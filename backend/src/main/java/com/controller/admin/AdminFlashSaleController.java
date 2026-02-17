@@ -14,18 +14,24 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/admin/flash-sales")
 @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+@org.springframework.transaction.annotation.Transactional(readOnly = true)
 public class AdminFlashSaleController {
 
     @Autowired
     private ProductService productService;
 
+    @Autowired
+    private com.mapper.ProductMapper productMapper;
+
     @GetMapping
-    public ResponseEntity<List<Product>> getActiveFlashSales() {
-        return ResponseEntity.ok(productService.getFlashSaleProducts());
+    public ResponseEntity<List<com.payload.response.ProductResponse>> getActiveFlashSales() {
+        return ResponseEntity
+                .ok(productService.getFlashSaleProducts().stream().map(productMapper::toResponse).toList());
     }
 
     @PostMapping("/{modelNo}")
-    public ResponseEntity<Product> setFlashSale(
+    @org.springframework.transaction.annotation.Transactional
+    public ResponseEntity<com.payload.response.ProductResponse> setFlashSale(
             @PathVariable Long modelNo,
             @RequestBody Map<String, Object> request) {
 
@@ -34,18 +40,31 @@ public class AdminFlashSaleController {
         LocalDateTime endTime = LocalDateTime.parse(endTimeStr);
 
         Product product = productService.getProductByModelNo(modelNo);
-        product.setSalePrice(salePrice);
-        product.setSaleEndTime(endTime);
+
+        // Update all variants with flash sale info
+        if (product.getVariants() != null) {
+            for (com.entity.ProductVariant v : product.getVariants()) {
+                v.setSalePrice(salePrice);
+                v.setSaleEndTime(endTime);
+            }
+        }
 
         // We reuse the update logic or specifically save it
-        return ResponseEntity.ok(productService.updateProductFields(product));
+        return ResponseEntity.ok(productMapper.toResponse(productService.updateProductFields(product)));
     }
 
     @DeleteMapping("/{modelNo}")
-    public ResponseEntity<Product> removeFlashSale(@PathVariable Long modelNo) {
+    @org.springframework.transaction.annotation.Transactional
+    public ResponseEntity<com.payload.response.ProductResponse> removeFlashSale(@PathVariable Long modelNo) {
         Product product = productService.getProductByModelNo(modelNo);
-        product.setSalePrice(null);
-        product.setSaleEndTime(null);
-        return ResponseEntity.ok(productService.updateProductFields(product));
+
+        // Remove sale from all variants
+        if (product.getVariants() != null) {
+            for (com.entity.ProductVariant v : product.getVariants()) {
+                v.setSalePrice(null);
+                v.setSaleEndTime(null);
+            }
+        }
+        return ResponseEntity.ok(productMapper.toResponse(productService.updateProductFields(product)));
     }
 }

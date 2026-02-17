@@ -20,6 +20,8 @@ public class AdminOrderDTO {
     // Order info
     private List<AdminOrderItemDTO> items;
     private double totalAmount;
+    private double discount;
     private String status;
+    private String currentLocation;
     private LocalDateTime orderDate;
 }

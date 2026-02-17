@@ -163,7 +163,7 @@ const MainNavbar = ({ textColor: propTextColor }) => {
         >
           <DirectionsRun sx={{ fontSize: 32, color: '#e63946', mr: 1 }} />
           <span style={{ fontWeight: 800, letterSpacing: '2px', fontSize: '1.25rem', color: TEXT_WHITE }}>
-            SOLECRAFT
+            SnapCart
           </span>
         </a>
 

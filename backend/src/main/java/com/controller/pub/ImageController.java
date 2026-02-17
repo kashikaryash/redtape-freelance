@@ -1,7 +1,6 @@
 package com.controller.pub;
 
-import com.entity.Product;
-import com.service.ProductService;
+import com.repository.ProductImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,44 +13,124 @@ import org.springframework.web.bind.annotation.*;
 public class ImageController {
 
     @Autowired
-    private ProductService productService;
+    private ProductImageRepository productImageRepository;
 
     /**
-     * Serve product image by modelNo and image number (1-5)
+     * Serve product image by ID (new path)
      */
+    @GetMapping("/{imageId}")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public ResponseEntity<byte[]> getImageById(@PathVariable Long imageId) {
+        return serveImage(imageId);
+    }
+
+    /**
+     * Backward compatibility: /product/{modelNo}/{imageNum}
+     * This is hard to map perfectly because modelNo -> variants -> images.
+     * We will try to find the 'primary' variant's Nth image, or just fail
+     * gracefully.
+     * Actually, the frontend uses this URL constructed by Mappers.
+     * The Mappers now construct: /api/images/product/{modelNo}/1
+     * But we populated ImageUrl in Mappers as: /api/images/product/{modelNo}/1 ...
+     * wait,
+     * In mapper I wrote: "/api/images/product/" + p.getModelNo() + "/1"
+     * I should change the mapper to point to the new ID-based endpoint:
+     * /api/images/{imageId}
+     * BUT, the mapper creates the URL string. I can change it now.
+     * 
+     * However, let's also try to support the old URL structure if possible,
+     * or at least make the old URL structure redirect or fetch *some* image.
+     */
+    @Autowired
+    private com.repository.ProductRepository productRepository;
+
     @GetMapping("/product/{modelNo}/{imageNum}")
-    public ResponseEntity<byte[]> getProductImage(
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public ResponseEntity<byte[]> getProductImageLegacy(
             @PathVariable Long modelNo,
             @PathVariable int imageNum) {
 
-        if (imageNum < 1 || imageNum > 5) {
-            return ResponseEntity.badRequest().build();
-        }
+        return productRepository.findById(modelNo)
+                .map(product -> {
+                    if (product.getVariants().isEmpty())
+                        return null;
 
+                    // Try to find the image across all variants, or just first one
+                    // Frontend usually wants the first variant's images
+                    com.entity.ProductVariant variant = product.getVariants().get(0);
+                    if (variant.getImages().size() < imageNum)
+                        return null;
+
+                    com.entity.ProductImage image = variant.getImages().get(imageNum - 1);
+                    return serveImage(image.getId());
+                })
+                .map(res -> res) // Unwrap from possible null in map
+                .orElseGet(() -> servePlaceholder());
+    }
+
+    private final java.nio.file.Path uploadLocation = java.nio.file.Paths.get("uploads").toAbsolutePath().normalize();
+
+    private ResponseEntity<byte[]> serveImage(Long imageId) {
+        return productImageRepository.findById(imageId)
+                .map(img -> {
+                    byte[] data = img.getImageData();
+                    String imageUrl = img.getImageUrl();
+
+                    // If imageData is empty but imageUrl is present, try reading from disk
+                    if ((data == null || data.length == 0) && imageUrl != null && imageUrl.startsWith("/uploads/")) {
+                        try {
+                            String fileName = imageUrl.substring("/uploads/".length());
+                            java.nio.file.Path filePath = uploadLocation.resolve(fileName).normalize();
+                            if (java.nio.file.Files.exists(filePath)) {
+                                data = java.nio.file.Files.readAllBytes(filePath);
+                            }
+                        } catch (Exception e) {
+                            // Fallback to placeholder if file read fails
+                        }
+                    }
+
+                    if (data == null || data.length == 0) {
+                        return servePlaceholder();
+                    }
+
+                    HttpHeaders headers = new HttpHeaders();
+                    String mimeType = img.getImageType();
+
+                    // Fallback to extension check if on disk and mimeType is missing/generic
+                    if ((mimeType == null || mimeType.equals("application/octet-stream")) && imageUrl != null) {
+                        if (imageUrl.toLowerCase().endsWith(".jpg") || imageUrl.toLowerCase().endsWith(".jpeg")) {
+                            mimeType = "image/jpeg";
+                        } else if (imageUrl.toLowerCase().endsWith(".png")) {
+                            mimeType = "image/png";
+                        } else if (imageUrl.toLowerCase().endsWith(".webp")) {
+                            mimeType = "image/webp";
+                        }
+                    }
+
+                    headers.setContentType(MediaType.parseMediaType(
+                            mimeType != null ? mimeType : "image/jpeg"));
+                    headers.setContentLength(data.length);
+                    headers.setCacheControl("public, max-age=86400");
+
+                    return new ResponseEntity<byte[]>(data, headers, HttpStatus.OK);
+                })
+                .orElseGet(() -> servePlaceholder());
+    }
+
+    private ResponseEntity<byte[]> servePlaceholder() {
         try {
-            Product product = productService.getProductByModelNo(modelNo);
-
-            if (product == null || !product.hasImage(imageNum)) {
-                return ResponseEntity.notFound().build();
-            }
-
-            byte[] imageData = product.getImageData(imageNum);
-            String contentType = product.getImageType(imageNum);
-
-            if (imageData == null || imageData.length == 0) {
-                return ResponseEntity.notFound().build();
-            }
+            org.springframework.core.io.Resource resource = new org.springframework.core.io.ClassPathResource(
+                    "static/assets/imagenotavailableplaceholder.png");
+            byte[] data = resource.getInputStream().readAllBytes();
 
             HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.parseMediaType(
-                    contentType != null ? contentType : "image/jpeg"));
-            headers.setContentLength(imageData.length);
-            headers.setCacheControl("public, max-age=86400"); // Cache for 1 day
+            headers.setContentType(MediaType.IMAGE_PNG);
+            headers.setContentLength(data.length);
+            headers.setCacheControl("public, max-age=86400");
 
-            return new ResponseEntity<>(imageData, headers, HttpStatus.OK);
-
+            return new ResponseEntity<>(data, headers, HttpStatus.OK);
         } catch (Exception e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 }

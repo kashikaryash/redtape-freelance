@@ -9,4 +9,6 @@ public class ProductSearchResponse {
     private Double price;
     private String image1;
     private String category;
+    private String color;
+    private String brandName;
 }

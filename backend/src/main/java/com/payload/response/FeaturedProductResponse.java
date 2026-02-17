@@ -8,5 +8,5 @@ public class FeaturedProductResponse {
     private String name;
     private double price;
     private String category;
-    private String img1;
+    private String imageUrl;
 }

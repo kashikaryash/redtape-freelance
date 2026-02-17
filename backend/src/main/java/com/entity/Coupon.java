@@ -53,6 +53,9 @@ public class Coupon {
     private int usedCount = 0;
 
     @Column(nullable = false)
+    private boolean isFirstOrderOnly = false;
+
+    @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public enum DiscountType {

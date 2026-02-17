@@ -50,11 +50,29 @@ public class CartController {
         return ResponseEntity.ok(cart);
     }
 
+    @PutMapping("/update/item/{cartItemId}")
+    public ResponseEntity<CartResponseDTO> updateItemById(
+            @PathVariable Long cartItemId,
+            @RequestBody java.util.Map<String, Integer> body) {
+
+        Integer quantity = body.get("quantity");
+        CartResponseDTO cart = cartService.updateItemQuantityByItemId(getCurrentUser(), cartItemId, quantity);
+        return ResponseEntity.ok(cart);
+    }
+
     @DeleteMapping("/remove/{productModelNo}")
     public ResponseEntity<CartResponseDTO> removeItem(
             @PathVariable String productModelNo) {
 
         CartResponseDTO cart = cartService.removeItemFromCart(getCurrentUser(), productModelNo);
+        return ResponseEntity.ok(cart);
+    }
+
+    @DeleteMapping("/remove/item/{cartItemId}")
+    public ResponseEntity<CartResponseDTO> removeItemById(
+            @PathVariable Long cartItemId) {
+
+        CartResponseDTO cart = cartService.removeItemFromCartById(getCurrentUser(), cartItemId);
         return ResponseEntity.ok(cart);
     }
 

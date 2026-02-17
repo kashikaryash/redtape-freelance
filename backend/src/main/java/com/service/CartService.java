@@ -5,12 +5,11 @@ import com.mapper.CartMapper;
 import com.payload.request.CartItemRequest;
 import com.payload.response.CartResponseDTO;
 import com.repository.CartRepository;
-import com.repository.ProductRepository;
-import jakarta.transaction.Transactional;
+import com.repository.ProductVariantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -20,10 +19,9 @@ public class CartService {
     private CartRepository cartRepository;
 
     @Autowired
-    private ProductRepository productRepository;
+    private ProductVariantRepository productVariantRepository;
 
-    @Autowired
-    private com.repository.CartItemRepository cartItemRepository;
+    // private com.repository.CartItemRepository cartItemRepository;
 
     @Transactional
     public CartResponseDTO getCartResponseByUser(User user) {
@@ -33,12 +31,7 @@ public class CartService {
 
     @Transactional
     public Cart getCartByUser(User user) {
-        // Warning: Native query cleanup might fail, so we also do in-memory cleanup
-        try {
-            cartItemRepository.deleteOrphanedItems();
-        } catch (Exception e) {
-            // Ignore
-        }
+        // Robust cleanup: Iterate and validate items
 
         Cart cart = cartRepository.findByUser(user).orElseGet(() -> {
             Cart newCart = new Cart();
@@ -53,19 +46,17 @@ public class CartService {
             while (iterator.hasNext()) {
                 CartItem item = iterator.next();
                 try {
-                    // Force load product
-                    if (item.getProduct() != null) {
-                        Product p = item.getProduct();
-                        Double activePrice = (p.getSalePrice() != null && p.getSaleEndTime() != null
-                                && p.getSaleEndTime().isAfter(java.time.LocalDateTime.now()))
-                                        ? p.getSalePrice()
-                                        : p.getPrice();
+                    // Force load variant
+                    if (item.getVariant() != null) {
+                        ProductVariant v = item.getVariant();
+                        Double activePrice = (v.getSalePrice() != null && v.getSaleEndTime() != null
+                                && v.getSaleEndTime().isAfter(java.time.LocalDateTime.now()))
+                                        ? v.getSalePrice()
+                                        : v.getPrice();
                         item.setPrice(activePrice);
                     } else {
-                        iterator.remove(); // Remove null product items
+                        iterator.remove(); // Remove null variant items
                     }
-                } catch (jakarta.persistence.EntityNotFoundException | org.hibernate.ObjectNotFoundException e) {
-                    iterator.remove();
                 } catch (Exception e) {
                     iterator.remove();
                 }
@@ -79,22 +70,37 @@ public class CartService {
 
     @Transactional
     public CartResponseDTO addItemToCart(User user, CartItemRequest request) {
-
-        // Use internal helper to get entity
         Cart cart = getCartByUser(user);
 
-        Long modelNo = Long.parseLong(Objects.requireNonNull(request.getProductModelNo()));
-        Product product = productRepository.findById(modelNo)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+        // Find variant by Product ID + Color + Size
+        Long modelNo = Long.parseLong(request.getProductModelNo());
+        String color = request.getColor();
+        String size = request.getSize();
+
+        // If color/size defaults are needed, handle here. For now assume strict match.
+        // If color is missing, try to find *any* variant? No, strict.
+
+        Optional<ProductVariant> variantOpt = productVariantRepository.findByProductModelNoAndColorAndSize(modelNo,
+                color, size);
+
+        if (variantOpt.isEmpty()) {
+            // Fallback: if only one variant exists for the product, use it?
+            // Or try finding by just ID if size/color are null?
+            // For now, throw exception to enforce correct data.
+            throw new RuntimeException(
+                    "Product Variant not found for model: " + modelNo + " color: " + color + " size: " + size);
+        }
+
+        ProductVariant variant = variantOpt.get();
 
         Optional<CartItem> existingItem = cart.getItems().stream()
-                .filter(item -> item.getProduct().getModelNo() == product.getModelNo())
+                .filter(item -> item.getVariant().getId().equals(variant.getId()))
                 .findFirst();
 
-        Double activePrice = (product.getSalePrice() != null && product.getSaleEndTime() != null
-                && product.getSaleEndTime().isAfter(java.time.LocalDateTime.now()))
-                        ? product.getSalePrice()
-                        : product.getPrice();
+        Double activePrice = (variant.getSalePrice() != null && variant.getSaleEndTime() != null
+                && variant.getSaleEndTime().isAfter(java.time.LocalDateTime.now()))
+                        ? variant.getSalePrice()
+                        : variant.getPrice();
 
         if (existingItem.isPresent()) {
             CartItem item = existingItem.get();
@@ -103,7 +109,7 @@ public class CartService {
         } else {
             CartItem newItem = new CartItem();
             newItem.setCart(cart);
-            newItem.setProduct(product);
+            newItem.setVariant(variant);
             newItem.setQuantity(request.getQuantity());
             newItem.setPrice(activePrice);
             cart.getItems().add(newItem);
@@ -114,12 +120,33 @@ public class CartService {
     }
 
     @Transactional
+    public CartResponseDTO updateItemQuantityByItemId(User user, Long cartItemId, int quantity) {
+        Cart cart = getCartByUser(user);
+
+        cart.getItems().stream()
+                .filter(item -> item.getId().equals(cartItemId))
+                .findFirst()
+                .ifPresent(item -> {
+                    if (quantity > 0) {
+                        item.setQuantity(quantity);
+                    } else {
+                        cart.getItems().remove(item);
+                    }
+                });
+
+        updateTotalAmount(cart);
+        return CartMapper.toDTO(cartRepository.save(cart));
+    }
+
+    @Transactional
     public CartResponseDTO updateItemQuantity(User user, String productModelNo, int quantity) {
         Cart cart = getCartByUser(user);
         Long modelNo = Long.parseLong(productModelNo);
 
+        // DEPRECATED LOGIC: Update ANY item with this product model no
+        // Ideally should pass cartItemId or variantId
         cart.getItems().stream()
-                .filter(item -> item.getProduct().getModelNo() == modelNo)
+                .filter(item -> item.getVariant().getProduct().getModelNo().equals(modelNo))
                 .findFirst()
                 .ifPresent(item -> {
                     if (quantity > 0) {
@@ -137,9 +164,16 @@ public class CartService {
     public CartResponseDTO removeItemFromCart(User user, String productModelNo) {
         Cart cart = getCartByUser(user);
         Long modelNo = Long.parseLong(productModelNo);
+        // Remove ALL items matching this product
+        cart.getItems().removeIf(item -> item.getVariant().getProduct().getModelNo().equals(modelNo));
+        updateTotalAmount(cart);
+        return CartMapper.toDTO(cartRepository.save(cart));
+    }
 
-        cart.getItems().removeIf(item -> item.getProduct().getModelNo() == modelNo);
-
+    @Transactional
+    public CartResponseDTO removeItemFromCartById(User user, Long cartItemId) {
+        Cart cart = getCartByUser(user);
+        cart.getItems().removeIf(item -> item.getId().equals(cartItemId));
         updateTotalAmount(cart);
         return CartMapper.toDTO(cartRepository.save(cart));
     }
@@ -148,7 +182,6 @@ public class CartService {
     public CartResponseDTO clearCart(User user) {
         Cart cart = getCartByUser(user);
         cart.getItems().clear();
-
         updateTotalAmount(cart);
         return CartMapper.toDTO(cartRepository.save(cart));
     }

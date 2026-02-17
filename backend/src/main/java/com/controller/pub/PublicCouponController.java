@@ -16,7 +16,18 @@ public class PublicCouponController {
 
     @GetMapping("/validate")
     public ResponseEntity<?> validateCoupon(@RequestParam String code, @RequestParam double cartValue) {
-        var result = couponService.validateCoupon(code, cartValue);
+        Long userId = null;
+        try {
+            com.service.UserDetailsImpl userDetails = (com.service.UserDetailsImpl) org.springframework.security.core.context.SecurityContextHolder
+                    .getContext()
+                    .getAuthentication()
+                    .getPrincipal();
+            userId = userDetails.getId();
+        } catch (Exception e) {
+            // Guest or not logged in
+        }
+
+        var result = couponService.validateCoupon(code, cartValue, userId);
 
         if (result.isValid()) {
             return ResponseEntity.ok(Map.of(

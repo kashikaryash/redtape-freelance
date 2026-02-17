@@ -213,7 +213,7 @@ const SignupPage = () => {
                                 Create Account
                             </Typography>
                             <Typography variant="body1" color="text.secondary">
-                                Join SOLECRAFT and explore premium footwear
+                                Join SnapCart and explore premium footwear
                             </Typography>
                         </Box>
 
@@ -430,7 +430,7 @@ const SignupPage = () => {
                                 WebkitTextFillColor: 'transparent',
                             }}
                         >
-                            SOLECRAFT
+                            SnapCart
                         </Typography>
                     </Box>
                     <Typography

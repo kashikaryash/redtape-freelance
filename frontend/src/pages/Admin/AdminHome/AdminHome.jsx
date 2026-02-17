@@ -195,7 +195,7 @@ const AdminHome = () => {
           >
             <DirectionsRun sx={{ fontSize: 32, color: '#e63946', mr: 1 }} />
             <Typography variant="h6" sx={{ fontWeight: 700, color: colors.text }}>
-              SOLECRAFT ADMIN
+              SnapCart ADMIN
             </Typography>
           </Box>
 

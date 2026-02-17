@@ -7,6 +7,8 @@ import com.dto.ProductSummaryDTO;
 import com.dto.UserDTO;
 import com.entity.Order;
 import com.entity.OrderItem;
+import com.entity.Product;
+import com.entity.ProductVariant;
 
 import java.util.List;
 
@@ -29,7 +31,9 @@ public class OrderMapper {
                                 userDTO,
                                 itemDTOs,
                                 order.getTotalAmount(),
+                                order.getDiscount(),
                                 order.getStatus().name(),
+                                order.getCurrentLocation(),
                                 order.getOrderDate());
         }
 
@@ -44,25 +48,51 @@ public class OrderMapper {
                                 order.getUser().getEmail(),
                                 order.getUser().getProfilePictureType());
 
+                List<com.dto.OrderTrackingDTO> trackingHistory = order.getTrackingHistory().stream()
+                                .map(t -> new com.dto.OrderTrackingDTO(t.getStatus(), t.getLocation(),
+                                                t.getTimestamp()))
+                                .toList();
+
                 return new OrderResponseDTO(
                                 order.getId(),
                                 userDTO,
                                 itemDTOs,
                                 order.getTotalAmount(),
+                                order.getDiscount(),
                                 order.getStatus().name(),
+                                order.getCurrentLocation(),
+                                trackingHistory,
                                 order.getOrderDate());
         }
 
         private static AdminOrderItemDTO toItemDTO(OrderItem item) {
+                ProductVariant variant = item.getVariant();
+                Product product = variant.getProduct();
+
+                String imageUrl = "/api/images/product/" + product.getModelNo() + "/1";
+                if (variant.getImages() != null && !variant.getImages().isEmpty()) {
+                        imageUrl = variant.getImages().get(0).getImageUrl();
+                }
+
+                if (imageUrl != null && imageUrl.startsWith("/")) {
+                        imageUrl = "http://localhost:8080" + imageUrl;
+                }
+
                 ProductSummaryDTO productDTO = new ProductSummaryDTO(
-                                item.getProduct().getModelNo(),
-                                item.getProduct().getName(),
-                                item.getProduct().getImg1());
+                                product.getModelNo(),
+                                product.getName(),
+                                imageUrl,
+                                product.isReturnable(),
+                                product.isReplaceable(),
+                                product.isSingleBrand());
 
                 return new AdminOrderItemDTO(
                                 productDTO,
                                 item.getPrice(),
                                 item.getQuantity(),
-                                item.getPrice() * item.getQuantity());
+                                item.getPrice() * item.getQuantity(),
+                                variant.getSize(),
+                                variant.getColor(),
+                                variant.getColorHex());
         }
 }

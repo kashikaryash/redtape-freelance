@@ -15,6 +15,9 @@ public class CouponService {
     @Autowired
     private CouponRepository couponRepository;
 
+    @Autowired
+    private com.repository.OrderRepository orderRepository;
+
     public List<Coupon> getAllCoupons() {
         return couponRepository.findAll();
     }
@@ -36,7 +39,7 @@ public class CouponService {
     /**
      * Validate coupon and return discount amount
      */
-    public CouponValidationResult validateCoupon(String code, double orderAmount) {
+    public CouponValidationResult validateCoupon(String code, double orderAmount, Long userId) {
         try {
             Coupon coupon = couponRepository.findByCodeAndIsActiveTrue(code.toUpperCase())
                     .orElse(null);
@@ -56,6 +59,17 @@ public class CouponService {
                 return new CouponValidationResult(false,
                         String.format("Minimum order amount is ₹%.0f", coupon.getMinOrderAmount()),
                         0, null);
+            }
+
+            if (coupon.isFirstOrderOnly()) {
+                if (userId == null) {
+                    return new CouponValidationResult(false, "This coupon is only for registered users' first order", 0,
+                            null);
+                }
+                long orderCount = orderRepository.countByUserIdAndStatusNot(userId, com.entity.OrderStatus.CANCELLED);
+                if (orderCount > 0) {
+                    return new CouponValidationResult(false, "This coupon is only valid for your first order", 0, null);
+                }
             }
 
             double discount = coupon.calculateDiscount(orderAmount);

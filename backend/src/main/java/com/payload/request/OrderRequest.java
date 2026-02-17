@@ -4,7 +4,8 @@ import lombok.Data;
 
 @Data
 public class OrderRequest {
-    private String shippingAddress;
+    private Object shippingAddress;
     private String paymentMethod;
     private Double discount;
+    private Long couponId;
 }

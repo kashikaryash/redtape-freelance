@@ -136,7 +136,7 @@ const LoginPage = () => {
                                 WebkitTextFillColor: 'transparent',
                             }}
                         >
-                            SOLECRAFT
+                            SnapCart
                         </Typography>
                     </Box>
                     <Typography

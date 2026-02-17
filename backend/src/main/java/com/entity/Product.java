@@ -10,33 +10,35 @@ import java.util.List;
 
 @Entity
 @Data
-@JsonIgnoreProperties({
-        "hibernateLazyInitializer",
-        "handler"
-})
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Product implements java.io.Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // ✅ safer than AUTO
-    private long modelNo;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long modelNo;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, unique = true, length = 255)
     private String name;
 
-    @Column(length = 30)
-    private String color;
+    @Column(name = "is_single_brand")
+    private Boolean isSingleBrand = false;
 
-    @Column(nullable = false)
-    private double price;
+    public boolean isSingleBrand() {
+        return isSingleBrand != null && isSingleBrand;
+    }
 
-    @Column(nullable = false)
-    private int quantity;
+    public void setSingleBrand(Boolean singleBrand) {
+        this.isSingleBrand = singleBrand;
+    }
 
-    // Flash Sale Fields
-    private Double salePrice;
-    private java.time.LocalDateTime saleEndTime;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "moderator_id")
+    private Moderator moderator;
+
+    @Column(name = "brand_name", length = 255)
+    private String brandName;
 
     @Enumerated(EnumType.STRING)
     private Category category;
@@ -44,94 +46,47 @@ public class Product implements java.io.Serializable {
     @Enumerated(EnumType.STRING)
     private SubCategory subCategory;
 
+    @Enumerated(EnumType.STRING)
+    private ProductGroup productGroup;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "product_about", joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "about_item")
+    private List<String> aboutItems = new ArrayList<>();
+
+    // Additional Information Fields
+    @Column(length = 2000)
+    private String manufacturer;
+
+    @Column(length = 2000)
+    private String packer;
+
+    @Column(length = 2000)
+    private String importer;
+
     @Column(length = 255)
+    private String itemWeight;
+
+    @Column(length = 2000)
+    private String itemDimensions;
+
+    @Column(length = 255)
+    private String netQuantity;
+
+    @Column(columnDefinition = "boolean default true")
+    private boolean isReturnable = true;
+
+    @Column(columnDefinition = "boolean default true")
+    private boolean isReplaceable = true;
+
+    @Column(length = 255)
+    private String genericName;
+
+    @Column(length = 5000)
     private String description;
 
-    /*
-     * =======================
-     * IMAGE DATA (LAZY)
-     * =======================
-     */
-
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    @Column(columnDefinition = "LONGBLOB")
-    @JsonIgnore
-    private byte[] image1Data;
-
-    private String image1Type;
-
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    @Column(columnDefinition = "LONGBLOB")
-    @JsonIgnore
-    private byte[] image2Data;
-
-    private String image2Type;
-
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    @Column(columnDefinition = "LONGBLOB")
-    @JsonIgnore
-    private byte[] image3Data;
-
-    private String image3Type;
-
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    @Column(columnDefinition = "LONGBLOB")
-    @JsonIgnore
-    private byte[] image4Data;
-
-    private String image4Type;
-
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    @Column(columnDefinition = "LONGBLOB")
-    @JsonIgnore
-    private byte[] image5Data;
-
-    private String image5Type;
-
-    /*
-     * =======================
-     * OLD IMAGE URLS
-     * =======================
-     */
-
-    @Column(length = 900)
-    private String img1;
-    @Column(length = 900)
-    private String img2;
-    @Column(length = 900)
-    private String img3;
-    @Column(length = 900)
-    private String img4;
-    @Column(length = 900)
-    private String img5;
-
-    /*
-     * =======================
-     * RELATIONSHIPS (LAZY + IGNORE)
-     * =======================
-     */
-
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private transient List<Image> images = new ArrayList<>();
-
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private transient List<UserReview> reviews = new ArrayList<>();
-
-    // 🚨 VERY IMPORTANT — BREAK CART & ORDER LOOPS
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-    @JsonIgnore
-    private transient List<CartItem> cartItems;
-
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-    @JsonIgnore
-    private transient List<OrderItem> orderItems;
+    private double price;
+    private int quantity;
 
     /*
      * =======================
@@ -150,33 +105,14 @@ public class Product implements java.io.Serializable {
 
     /*
      * =======================
-     * HELPERS
+     * RELATIONSHIPS
      * =======================
      */
 
-    public boolean hasImage(int num) {
-        return getImageData(num) != null && getImageData(num).length > 0;
-    }
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<ProductVariant> variants = new ArrayList<>();
 
-    public byte[] getImageData(int num) {
-        return switch (num) {
-            case 1 -> image1Data;
-            case 2 -> image2Data;
-            case 3 -> image3Data;
-            case 4 -> image4Data;
-            case 5 -> image5Data;
-            default -> null;
-        };
-    }
-
-    public String getImageType(int num) {
-        return switch (num) {
-            case 1 -> image1Type;
-            case 2 -> image2Type;
-            case 3 -> image3Type;
-            case 4 -> image4Type;
-            case 5 -> image5Type;
-            default -> null;
-        };
-    }
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<UserReview> reviews = new ArrayList<>();
 }

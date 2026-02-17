@@ -8,9 +8,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminOrderItemDTO {
-
     private ProductSummaryDTO product;
     private double price;
     private int quantity;
-    private double itemTotal;
+    private double total;
+    private String size;
+    private String color;
+    private String colorHex;
 }

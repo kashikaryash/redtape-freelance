@@ -1,7 +1,6 @@
 package com.controller.user;
 
 import com.dto.OrderResponseDTO;
-import com.mapper.OrderMapper;
 import com.entity.Order;
 import com.entity.OrderStatus;
 import com.entity.User;
@@ -33,8 +32,8 @@ public class OrderController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<OrderResponseDTO> placeOrder(@RequestBody com.payload.request.OrderRequest request) {
         User user = getCurrentUser();
-        Order order = orderService.placeOrder(user, request);
-        return ResponseEntity.ok(OrderMapper.toResponseDTO(order));
+        OrderResponseDTO orderResponse = orderService.placeOrder(user, request);
+        return ResponseEntity.ok(orderResponse);
     }
 
     @GetMapping("/my-orders")
@@ -42,6 +41,14 @@ public class OrderController {
     public ResponseEntity<List<OrderResponseDTO>> getMyOrders() {
         User user = getCurrentUser();
         return ResponseEntity.ok(orderService.getUserOrdersDTO(user));
+    }
+
+    @GetMapping("/check-first-order")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Boolean> isFirstOrder() {
+        User user = getCurrentUser();
+        long count = orderService.countUserOrders(user);
+        return ResponseEntity.ok(count == 0);
     }
 
     @GetMapping("/{orderId}")
@@ -87,5 +94,29 @@ public class OrderController {
                 .getPrincipal();
         return userRepository.findById(Objects.requireNonNull(userDetails.getId(), "User ID is required"))
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    @GetMapping("/{orderId}/invoice")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    public ResponseEntity<byte[]> downloadInvoice(
+            @PathVariable Long orderId,
+            @AuthenticationPrincipal UserDetailsImpl currentUser) {
+
+        Order order = orderService.getOrderById(orderId);
+
+        boolean isAdminOrMod = currentUser.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")
+                        || a.getAuthority().equals("ROLE_MODERATOR"));
+
+        if (!isAdminOrMod && !order.getUser().getId().equals(currentUser.getId())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        byte[] invoicePdf = orderService.generateInvoice(orderId);
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=Invoice_" + orderId + ".pdf")
+                .header("Content-Type", "application/pdf")
+                .body(invoicePdf);
     }
 }

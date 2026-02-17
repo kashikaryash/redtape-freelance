@@ -21,7 +21,10 @@ public class ReviewMapper {
         ProductSummaryDTO productDTO = new ProductSummaryDTO(
                 review.getProduct().getModelNo(),
                 review.getProduct().getName(),
-                review.getProduct().getImg1());
+                "/api/images/product/" + review.getProduct().getModelNo() + "/1",
+                review.getProduct().isReturnable(),
+                review.getProduct().isReplaceable(),
+                review.getProduct().isSingleBrand());
 
         return new ReviewResponseDTO(
                 review.getId(),

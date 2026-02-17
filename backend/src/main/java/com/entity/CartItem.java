@@ -3,6 +3,8 @@ package com.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
+import lombok.EqualsAndHashCode;
 
 @Entity
 @Data
@@ -16,12 +18,15 @@ public class CartItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false)
     @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Cart cart;
 
-    // Product reference
+    // Variant reference (Specific Color/Size)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_model_no", referencedColumnName = "modelNo", nullable = false)
-    private Product product;
+    @JoinColumn(name = "variant_id", nullable = false)
+    @JsonIgnore
+    private ProductVariant variant;
 
     @Column(nullable = false)
     private int quantity;

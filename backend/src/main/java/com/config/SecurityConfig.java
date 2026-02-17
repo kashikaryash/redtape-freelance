@@ -104,6 +104,7 @@ public class SecurityConfig {
                                                                 "/v3/api-docs/**",
                                                                 "/api/auth/**",
                                                                 "/api/public/**",
+                                                                "/api/images/**",
                                                                 "/actuator/**")
                                                 .permitAll()
 
@@ -125,10 +126,18 @@ public class SecurityConfig {
 
                                                 // ---------------- ADMIN ONLY ----------------
                                                 .requestMatchers("/api/admin/**")
-                                                .hasRole("ADMIN")
+                                                .hasAnyRole("ADMIN", "SUPER_ADMIN")
+
+                                                // ---------------- SUPER ADMIN ONLY ----------------
+                                                .requestMatchers(
+                                                                "/api/super-admin/**",
+                                                                "/api/admin/invoices/*/resend",
+                                                                "/api/admin/moderators/**")
+                                                .hasRole("SUPER_ADMIN")
 
                                                 // ---------------- USER ACCESS ----------------
-                                                .requestMatchers("/api/cart/**", "/api/orders/**")
+                                                .requestMatchers("/api/cart/**", "/api/cart", "/api/orders/**",
+                                                                "/api/orders")
                                                 .hasRole("USER")
 
                                                 // ---------------- FALLBACK ----------------

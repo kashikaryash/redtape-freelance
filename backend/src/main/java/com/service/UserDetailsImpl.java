@@ -7,8 +7,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+
 import java.util.Objects;
 
 public class UserDetailsImpl implements UserDetails {
@@ -35,8 +34,14 @@ public class UserDetailsImpl implements UserDetails {
     }
 
     public static UserDetailsImpl build(User user) {
-        List<GrantedAuthority> authorities = Collections.singletonList(
-                new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        java.util.List<GrantedAuthority> authorities = new java.util.ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+
+        // Admins and Moderators should also have USER role for common features like
+        // Cart, Orders etc.
+        if (user.getRole() != null && user.getRole() != com.entity.Role.USER) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        }
 
         return new UserDetailsImpl(
                 user.getId(),

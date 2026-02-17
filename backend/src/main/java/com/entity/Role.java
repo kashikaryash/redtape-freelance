@@ -1,5 +1,5 @@
 package com.entity;
 
 public enum Role {
-	ADMIN, MODERATOR, USER
+	USER, MODERATOR, ADMIN, SUPER_ADMIN
 }

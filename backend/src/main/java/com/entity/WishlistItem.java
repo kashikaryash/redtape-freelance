@@ -21,6 +21,7 @@ public class WishlistItem {
 
     @ManyToOne
     @JoinColumn(name = "product_model_no")
+    @JsonIgnore
     private Product product;
 
     private LocalDateTime addedDate;

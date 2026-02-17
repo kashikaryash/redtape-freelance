@@ -95,4 +95,29 @@ public class AuthController {
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
+
+    @PostMapping("/dev-login")
+    public ResponseEntity<?> devLogin(@RequestBody LoginRequest loginRequest) {
+        log.warn("DEVELOPMENT AUTO-LOGIN for: {}", loginRequest.getEmail());
+        User user = userRepository.findByEmail(loginRequest.getEmail())
+                .orElseThrow(
+                        () -> new RuntimeException("Error: User not found with email: " + loginRequest.getEmail()));
+
+        UserDetailsImpl userDetails = UserDetailsImpl.build(user);
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities());
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
+
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(item -> item.getAuthority())
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(new JwtResponse(jwt,
+                userDetails.getId(),
+                userDetails.getName(),
+                userDetails.getEmail(),
+                roles));
+    }
 }

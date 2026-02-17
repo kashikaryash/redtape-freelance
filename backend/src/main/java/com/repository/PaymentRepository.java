@@ -9,6 +9,8 @@ import java.util.List;
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
     Optional<Payment> findByOrder(Order order);
 
+    Optional<Payment> findByOrderId(Long orderId);
+
     List<Payment> findByUserId(Long userId);
 
     Optional<Payment> findByStripePaymentIntentId(String stripePaymentIntentId);

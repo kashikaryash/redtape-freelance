@@ -12,4 +12,7 @@ public class CartItemRequest {
 
     @Min(1)
     private int quantity;
+
+    private String size;
+    private String color;
 }

@@ -5,13 +5,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class CartItemDTO {
-
     private Long id;
     private ProductSummaryDTO product;
-    private double productPrice;
+    private Long variantId;
+    private double price;
     private int quantity;
-    private double itemTotal;
+    private double total;
+    private String size;
+    private String color;
+    private String colorHex;
 }

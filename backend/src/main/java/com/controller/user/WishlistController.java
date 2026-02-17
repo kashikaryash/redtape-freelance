@@ -2,6 +2,8 @@ package com.controller.user;
 
 import com.entity.User;
 import com.entity.Wishlist;
+import com.mapper.WishlistMapper;
+import com.payload.response.WishlistResponseDTO;
 import com.repository.UserRepository;
 import com.service.UserDetailsImpl;
 import com.service.WishlistService;
@@ -23,25 +25,31 @@ public class WishlistController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private WishlistMapper wishlistMapper;
+
     @GetMapping
     @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    public ResponseEntity<Wishlist> getWishlist() {
+    public ResponseEntity<WishlistResponseDTO> getWishlist() {
         User user = getCurrentUser();
-        return ResponseEntity.ok(wishlistService.getWishlistByUser(user));
+        Wishlist wishlist = wishlistService.getWishlistByUser(user);
+        return ResponseEntity.ok(wishlistMapper.toResponse(wishlist));
     }
 
     @PostMapping("/add/{productModelNo}")
     @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    public ResponseEntity<Wishlist> addToWishlist(@PathVariable Long productModelNo) {
+    public ResponseEntity<WishlistResponseDTO> addToWishlist(@PathVariable Long productModelNo) {
         User user = getCurrentUser();
-        return ResponseEntity.ok(wishlistService.addToWishlist(user, productModelNo));
+        Wishlist wishlist = wishlistService.addToWishlist(user, productModelNo);
+        return ResponseEntity.ok(wishlistMapper.toResponse(wishlist));
     }
 
     @DeleteMapping("/remove/{productModelNo}")
     @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    public ResponseEntity<Wishlist> removeFromWishlist(@PathVariable Long productModelNo) {
+    public ResponseEntity<WishlistResponseDTO> removeFromWishlist(@PathVariable Long productModelNo) {
         User user = getCurrentUser();
-        return ResponseEntity.ok(wishlistService.removeFromWishlist(user, productModelNo));
+        Wishlist wishlist = wishlistService.removeFromWishlist(user, productModelNo);
+        return ResponseEntity.ok(wishlistMapper.toResponse(wishlist));
     }
 
     private User getCurrentUser() {

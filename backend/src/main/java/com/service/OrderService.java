@@ -18,19 +18,24 @@ import java.util.stream.Collectors;
 public class OrderService {
 
     @Autowired
-    private OrderRepository orderRepository;
-
-    @Autowired
     private CartRepository cartRepository;
+    @Autowired
+    private OrderRepository orderRepository;
 
     @Autowired
     private CartService cartService;
 
     @Autowired
+    private CouponService couponService;
+
+    @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private InvoiceService invoiceService;
+
     @Transactional
-    public Order placeOrder(User user, com.payload.request.OrderRequest request) {
+    public OrderResponseDTO placeOrder(User user, com.payload.request.OrderRequest request) {
         Cart cart = cartService.getCartByUser(user);
 
         if (cart.getItems().isEmpty()) {
@@ -39,43 +44,101 @@ public class OrderService {
 
         Order order = new Order();
         order.setUser(user);
-        order.setTotalAmount(cart.getTotalAmount());
+
+        double subtotal = cart.getTotalAmount();
+        double discountAmount = request.getDiscount() != null ? request.getDiscount() : 0.0;
+
+        order.setTotalAmount(Math.max(0, subtotal - discountAmount));
+        order.setDiscount(discountAmount);
+
+        // Track coupon usage
+        if (request.getCouponId() != null) {
+            try {
+                couponService.incrementUsage(request.getCouponId());
+            } catch (Exception e) {
+                System.err.println("Warning: Could not increment coupon usage: " + e.getMessage());
+            }
+        }
+
         order.setStatus(OrderStatus.PENDING);
-        order.setShippingAddress(request.getShippingAddress());
+        order.setPaymentStatus(PaymentStatus.PENDING); // Explicitly set to avoid constraint issues
+
+        // Handle shipping address (could be String or Object from frontend)
+        String shippingAddrStr = "";
+        if (request.getShippingAddress() != null) {
+            if (request.getShippingAddress() instanceof String) {
+                shippingAddrStr = (String) request.getShippingAddress();
+            } else {
+                try {
+                    shippingAddrStr = new com.fasterxml.jackson.databind.ObjectMapper()
+                            .writeValueAsString(request.getShippingAddress());
+                } catch (Exception e) {
+                    shippingAddrStr = request.getShippingAddress().toString();
+                }
+            }
+        }
+        order.setShippingAddress(shippingAddrStr);
         order.setPaymentMethod(request.getPaymentMethod());
+        order.setOrderDate(java.time.LocalDateTime.now());
 
         List<OrderItem> orderItems = cart.getItems().stream().map(cartItem -> {
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
-            orderItem.setProduct(cartItem.getProduct());
+            orderItem.setVariant(cartItem.getVariant());
             orderItem.setQuantity(cartItem.getQuantity());
             orderItem.setPrice(cartItem.getPrice());
 
             // Reduce stock
-            Product product = cartItem.getProduct();
-            if (product.getQuantity() < cartItem.getQuantity()) {
-                throw new RuntimeException("Insufficient stock for product: " + product.getName());
+            ProductVariant variant = cartItem.getVariant();
+            if (variant.getQuantity() < cartItem.getQuantity()) {
+                throw new RuntimeException("Insufficient stock for product: " + variant.getProduct().getName());
             }
-            product.setQuantity(product.getQuantity() - cartItem.getQuantity());
-            // Product is saved automatically if JPA is in transition or we can call save
+            variant.setQuantity(variant.getQuantity() - cartItem.getQuantity());
 
             return orderItem;
         }).collect(Collectors.toList());
 
         order.setItems(orderItems);
 
+        // Payment Routing Logic
+        System.out.println("--- Payment Routing Processing for Order ---");
+        for (OrderItem item : orderItems) {
+            Product product = item.getVariant().getProduct();
+            double itemTotal = item.getPrice() * item.getQuantity();
+
+            if (product.isSingleBrand() && product.getModerator() != null) {
+                // Access payment info from User entity linked to Moderator
+                String moderationPayInfo = product.getModerator().getUser().getPaymentInfo();
+                System.out.println("[SINGLE BRAND] Routing ₹" + itemTotal + " for '" + product.getName()
+                        + "' directly to Moderator (ID: " + product.getModerator().getId() + "). "
+                        + "PayInfo: " + (moderationPayInfo != null ? moderationPayInfo : "None"));
+            } else {
+                System.out.println("[PLATFORM] Routing ₹" + itemTotal + " for '" + product.getName()
+                        + "' to Central Platform Wallet.");
+            }
+        }
+        System.out.println("--------------------------------------------");
+
         // Save the order
         Order savedOrder = orderRepository.save(order);
 
-        // Clear the cart
-        cart.getItems().clear();
-        cart.setTotalAmount(0.0);
-        cartRepository.save(cart);
+        // Clear the cart directly to avoid cross-transactional rollback issues
+        try {
+            cart.getItems().clear();
+            cart.setTotalAmount(0.0);
+            cartRepository.save(cart);
+        } catch (Exception e) {
+            System.err.println("Warning: Failed to clear cart after successful order: " + e.getMessage());
+        }
 
-        // Send confirmation email
-        emailService.sendOrderConfirmation(user.getEmail(), savedOrder.getId().toString());
+        // Generate Invoice for record keeping (but send email only after payment)
+        try {
+            invoiceService.generateInvoice(savedOrder.getId());
+        } catch (Exception e) {
+            System.err.println("Failed to generate invoice: " + e.getMessage());
+        }
 
-        return savedOrder;
+        return OrderMapper.toResponseDTO(savedOrder);
     }
 
     @Transactional
@@ -86,6 +149,11 @@ public class OrderService {
     public Order getOrderById(Long orderId) {
         return orderRepository.findById(Objects.requireNonNull(orderId, "Order ID is required"))
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
+    }
+
+    @Transactional(readOnly = true)
+    public long countUserOrders(User user) {
+        return orderRepository.countByUserIdAndStatusNot(user.getId(), OrderStatus.CANCELLED);
     }
 
     @Transactional
@@ -114,14 +182,15 @@ public class OrderService {
 
         // Restore product stock
         for (OrderItem item : order.getItems()) {
-            Product product = item.getProduct();
-            product.setQuantity(product.getQuantity() + item.getQuantity());
+            ProductVariant variant = item.getVariant();
+            if (variant != null) {
+                variant.setQuantity(variant.getQuantity() + item.getQuantity());
+            }
         }
 
         order.setStatus(OrderStatus.CANCELLED);
         Order savedOrder = orderRepository.save(order);
 
-        // Send cancellation email
         User user = order.getUser();
         emailService.sendOrderStatusUpdate(
                 user.getEmail(),
@@ -154,5 +223,55 @@ public class OrderService {
 
     public long getTotalOrderCount() {
         return orderRepository.count();
+    }
+
+    @Transactional
+    public Order updateOrderLocation(Long orderId, String location, String statusStr) {
+        Order order = getOrderById(orderId);
+
+        // Update basic status if provided
+        OrderStatus status = OrderStatus.valueOf(statusStr.toUpperCase());
+        if (status != order.getStatus()) {
+            order.setStatus(status);
+        }
+
+        // Update location
+        order.setCurrentLocation(location);
+
+        // Add to tracking history
+        OrderTracking tracking = new OrderTracking(order, status.name(), location);
+        order.getTrackingHistory().add(tracking); // Cascaded save
+
+        Order savedOrder = orderRepository.save(order);
+
+        // Send email
+        User user = order.getUser();
+        emailService.sendOrderTrackingUpdate(
+                user.getEmail(),
+                orderId.toString(),
+                status.name(),
+                location,
+                user.getName());
+
+        return savedOrder;
+    }
+
+    @Transactional
+    public void deleteOrder(Long orderId) {
+        Order order = getOrderById(orderId);
+
+        // Restore product stock before deleting
+        for (OrderItem item : order.getItems()) {
+            ProductVariant variant = item.getVariant();
+            if (variant != null) {
+                variant.setQuantity(variant.getQuantity() + item.getQuantity());
+            }
+        }
+
+        orderRepository.delete(order);
+    }
+
+    public byte[] generateInvoice(Long orderId) {
+        return invoiceService.generateInvoice(orderId);
     }
 }

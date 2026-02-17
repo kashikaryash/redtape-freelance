@@ -15,6 +15,9 @@ public class OrderResponseDTO {
     private UserDTO user;
     private List<AdminOrderItemDTO> items; // Can reuse AdminOrderItemDTO as it has the same structure needed
     private double totalAmount;
+    private double discount;
     private String status;
+    private String currentLocation;
+    private List<OrderTrackingDTO> trackingHistory;
     private LocalDateTime orderDate;
 }

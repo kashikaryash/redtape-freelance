@@ -1,7 +1,9 @@
 package com.service;
 
 import com.entity.Product;
+import com.entity.ProductVariant;
 import com.repository.ProductRepository;
+import com.repository.ProductVariantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,77 +18,87 @@ public class InventoryService {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private ProductVariantRepository productVariantRepository;
+
     /**
-     * Check if enough stock is available for a product
+     * Check if enough stock is available for a variant
      */
-    public boolean checkStockAvailability(Long productId, int requestedQuantity) {
-        Product product = productRepository.findById(Objects.requireNonNull(productId, "Product ID is required"))
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-        return product.getQuantity() >= requestedQuantity;
+    public boolean checkStockAvailability(Long variantId, int requestedQuantity) {
+        ProductVariant variant = productVariantRepository
+                .findById(Objects.requireNonNull(variantId, "Variant ID is required"))
+                .orElseThrow(() -> new RuntimeException("Variant not found"));
+        return variant.getQuantity() >= requestedQuantity;
     }
 
-    /**
-     * Reduce stock after a successful order
-     */
-    @Transactional
-    public void reduceStock(Long productId, int quantity) {
-        Product product = productRepository.findById(Objects.requireNonNull(productId, "Product ID is required"))
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+    // reduceStock and restoreStock are now handled directly in OrderService
+    // keeping them here if needed for other flows, but updating to use variant
 
-        if (product.getQuantity() < quantity) {
-            throw new RuntimeException("Insufficient stock for product: " + product.getName());
+    @Transactional
+    public void reduceStock(Long variantId, int quantity) {
+        ProductVariant variant = productVariantRepository
+                .findById(Objects.requireNonNull(variantId, "Variant ID is required"))
+                .orElseThrow(() -> new RuntimeException("Variant not found"));
+
+        if (variant.getQuantity() < quantity) {
+            throw new RuntimeException("Insufficient stock for product: " + variant.getProduct().getName());
         }
 
-        product.setQuantity(product.getQuantity() - quantity);
-        productRepository.save(product);
+        variant.setQuantity(variant.getQuantity() - quantity);
+        productVariantRepository.save(variant);
     }
 
-    /**
-     * Restore stock on order cancellation
-     */
     @Transactional
-    public void restoreStock(Long productId, int quantity) {
-        Product product = productRepository.findById(Objects.requireNonNull(productId, "Product ID is required"))
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-        product.setQuantity(product.getQuantity() + quantity);
-        productRepository.save(product);
+    public void restoreStock(Long variantId, int quantity) {
+        ProductVariant variant = productVariantRepository
+                .findById(Objects.requireNonNull(variantId, "Variant ID is required"))
+                .orElseThrow(() -> new RuntimeException("Variant not found"));
+        variant.setQuantity(variant.getQuantity() + quantity);
+        productVariantRepository.save(variant);
     }
 
     /**
-     * Get all products with low stock
+     * Get all variants with low stock
      */
-    public List<Product> getLowStockProducts() {
-        return productRepository.findAll().stream()
-                .filter(p -> p.getQuantity() <= p.getLowStockThreshold() && p.getQuantity() > 0)
+    public List<ProductVariant> getLowStockVariants() {
+        // Threshold is currently on Product.
+        // Logic: Variant is low if quantity <= Product.lowStockThreshold
+        // We need to join? Or fetch all and filter?
+        // Fetching all might be heavy.
+        // Better: Custom query. For now, stream filter.
+        return productVariantRepository.findAll().stream()
+                .filter(v -> v.getQuantity() <= v.getProduct().getLowStockThreshold() && v.getQuantity() > 0)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Get all out-of-stock products
+     * Get all out-of-stock variants
      */
-    public List<Product> getOutOfStockProducts() {
-        return productRepository.findAll().stream()
-                .filter(p -> p.getQuantity() == 0)
+    public List<ProductVariant> getOutOfStockVariants() {
+        return productVariantRepository.findAll().stream()
+                .filter(v -> v.getQuantity() == 0)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Update stock quantity for a product
+     * Update stock quantity for a variant
      */
     @Transactional
-    public Product updateStock(Long productId, int newQuantity) {
+    public ProductVariant updateStock(Long variantId, int newQuantity) {
         if (newQuantity < 0) {
             throw new RuntimeException("Stock quantity cannot be negative");
         }
 
-        Product product = productRepository.findById(Objects.requireNonNull(productId, "Product ID is required"))
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-        product.setQuantity(newQuantity);
-        return productRepository.save(product);
+        ProductVariant variant = productVariantRepository
+                .findById(Objects.requireNonNull(variantId, "Variant ID is required"))
+                .orElseThrow(() -> new RuntimeException("Variant not found"));
+        variant.setQuantity(newQuantity);
+        return productVariantRepository.save(variant);
     }
 
     /**
-     * Update low stock threshold for a product
+     * Update low stock threshold for a product (threshold applies to all variants
+     * of this product)
      */
     @Transactional
     public Product updateLowStockThreshold(Long productId, int threshold) {
@@ -98,18 +110,5 @@ public class InventoryService {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
         product.setLowStockThreshold(threshold);
         return productRepository.save(product);
-    }
-
-    /**
-     * Get stock status for a product
-     */
-    public String getStockStatus(Product product) {
-        if (product.getQuantity() == 0) {
-            return "OUT_OF_STOCK";
-        } else if (product.getQuantity() <= product.getLowStockThreshold()) {
-            return "LOW_STOCK";
-        } else {
-            return "IN_STOCK";
-        }
     }
 }
