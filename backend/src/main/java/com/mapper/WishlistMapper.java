@@ -47,7 +47,7 @@ public class WishlistMapper {
             }
 
             if (url != null && url.startsWith("/")) {
-                url = "https://steadfast-rejoicing-production.up.railway.app" + url;
+                url = "https://zestful-recreation-production.up.railway.app" + url;
             }
             dto.setImageUrl(url);
 

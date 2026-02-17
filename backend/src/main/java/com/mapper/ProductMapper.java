@@ -100,7 +100,7 @@ public class ProductMapper {
                     imgDto.setId(img.getId());
                     // Point to the ImageController endpoint that serves by ID
                     imgDto.setImageUrl(
-                            "https://steadfast-rejoicing-production.up.railway.app/api/images/" + img.getId());
+                            "https://zestful-recreation-production.up.railway.app/api/images/" + img.getId());
                     imgDto.setPrimary(img.isPrimary());
                     return imgDto;
                 }).collect(Collectors.toList());

@@ -238,7 +238,7 @@ public class ProductService {
                 if (!v.getImages().isEmpty()) {
                     String url = v.getImages().get(0).getImageUrl();
                     if (url != null && url.startsWith("/")) {
-                        url = "https://steadfast-rejoicing-production.up.railway.app" + url;
+                        url = "https://zestful-recreation-production.up.railway.app" + url;
                     }
                     dto.setImageUrl(url);
                 }

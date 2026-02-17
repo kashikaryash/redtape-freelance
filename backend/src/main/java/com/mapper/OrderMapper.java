@@ -75,7 +75,7 @@ public class OrderMapper {
                 }
 
                 if (imageUrl != null && imageUrl.startsWith("/")) {
-                        imageUrl = "https://steadfast-rejoicing-production.up.railway.app" + imageUrl;
+                        imageUrl = "https://zestful-recreation-production.up.railway.app" + imageUrl;
                 }
 
                 ProductSummaryDTO productDTO = new ProductSummaryDTO(
