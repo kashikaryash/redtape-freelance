@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class OrderTrackingDTO {
     private String status;
-    private String location;
+    private String city;
+    private String state;
+    private String description;
     private LocalDateTime timestamp;
 }

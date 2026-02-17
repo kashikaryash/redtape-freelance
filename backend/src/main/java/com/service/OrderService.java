@@ -6,6 +6,7 @@ import com.entity.*;
 import com.mapper.OrderMapper;
 import com.repository.CartRepository;
 import com.repository.OrderRepository;
+import com.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,17 @@ public class OrderService {
     @Autowired
     private InvoiceService invoiceService;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private WalletService walletService;
+
+    @Autowired
+    private OrderTrackingService orderTrackingService;
+
+    private static final double PLATFORM_COMMISSION_PERCENT = 10.0;
+
     @Transactional
     public OrderResponseDTO placeOrder(User user, com.payload.request.OrderRequest request) {
         Cart cart = cartService.getCartByUser(user);
@@ -61,7 +73,8 @@ public class OrderService {
         }
 
         order.setStatus(OrderStatus.PENDING);
-        order.setPaymentStatus(PaymentStatus.PENDING); // Explicitly set to avoid constraint issues
+        order.setPaymentStatus(PaymentStatus.PENDING); // Explicitly set to avoid
+                                                       // constraint issues
 
         // Handle shipping address (could be String or Object from frontend)
         String shippingAddrStr = "";
@@ -100,25 +113,6 @@ public class OrderService {
 
         order.setItems(orderItems);
 
-        // Payment Routing Logic
-        System.out.println("--- Payment Routing Processing for Order ---");
-        for (OrderItem item : orderItems) {
-            Product product = item.getVariant().getProduct();
-            double itemTotal = item.getPrice() * item.getQuantity();
-
-            if (product.isSingleBrand() && product.getModerator() != null) {
-                // Access payment info from User entity linked to Moderator
-                String moderationPayInfo = product.getModerator().getUser().getPaymentInfo();
-                System.out.println("[SINGLE BRAND] Routing ₹" + itemTotal + " for '" + product.getName()
-                        + "' directly to Moderator (ID: " + product.getModerator().getId() + "). "
-                        + "PayInfo: " + (moderationPayInfo != null ? moderationPayInfo : "None"));
-            } else {
-                System.out.println("[PLATFORM] Routing ₹" + itemTotal + " for '" + product.getName()
-                        + "' to Central Platform Wallet.");
-            }
-        }
-        System.out.println("--------------------------------------------");
-
         // Save the order
         Order savedOrder = orderRepository.save(order);
 
@@ -138,7 +132,96 @@ public class OrderService {
             System.err.println("Failed to generate invoice: " + e.getMessage());
         }
 
+        // Add initial tracking record
+        try {
+            // Get warehouse details from the first item's moderator (simplified)
+            Moderator moderator = orderItems.get(0).getVariant().getProduct().getModerator();
+            String city = (moderator != null && moderator.getWarehouseCity() != null) ? moderator.getWarehouseCity()
+                    : "Mumbai";
+            String state = (moderator != null && moderator.getWarehouseState() != null) ? moderator.getWarehouseState()
+                    : "Maharashtra";
+
+            orderTrackingService.addTrackingRecord(savedOrder.getId(), TrackingStatus.ORDER_CONFIRMED,
+                    city, state, "Order has been confirmed and is being prepared.");
+        } catch (Exception e) {
+            System.err.println("Failed to add initial tracking record: " + e.getMessage());
+        }
+
         return OrderMapper.toResponseDTO(savedOrder);
+    }
+
+    /**
+     * Distributes payments between Moderators and Super Admin based on order
+     * composition.
+     */
+    @Transactional
+    public void distributePayments(Order order) {
+        if (order.getPaymentStatus() != PaymentStatus.COMPLETED) {
+            return;
+        }
+
+        User superAdmin = findSuperAdmin();
+        List<OrderItem> items = order.getItems();
+
+        // Identify unique brands
+        java.util.Set<Long> brandModeratorIds = items.stream()
+                .map(item -> item.getVariant().getProduct().getModerator()).filter(Objects::nonNull)
+                .map(Moderator::getId).collect(Collectors.toSet());
+
+        boolean isSingleBrand = brandModeratorIds.size() == 1;
+        double totalDiscount = order.getDiscount();
+        double subtotal = items.stream().mapToDouble(i -> i.getPrice() * i.getQuantity()).sum();
+
+        // Ratio of actual price paid vs subtotal (to handle flat discounts
+        // proportionally)
+        double priceRatio = subtotal > 0 ? (subtotal - totalDiscount) / subtotal : 1.0;
+
+        if (isSingleBrand) {
+            // Case 1: Single Brand - Automatic Split
+            Moderator moderator = items.get(0).getVariant().getProduct().getModerator();
+            double netOrderAmount = (subtotal - totalDiscount);
+            double commission = netOrderAmount * (PLATFORM_COMMISSION_PERCENT / 100.0);
+            double moderatorShare = netOrderAmount - commission;
+
+            walletService.creditWallet(moderator.getUser(), moderatorShare, Transaction.TransactionSource.ORDER_PAYMENT,
+                    order.getId().toString(), "Share for Single Brand Order #" + order.getId());
+
+            walletService.creditWallet(superAdmin, commission, Transaction.TransactionSource.COMMISSION,
+                    order.getId().toString(), "Commission for Single Brand Order #" + order.getId());
+        } else {
+            // Case 2: Multiple Brands - Admin receives full amount first, then distributes
+            // Logic: Calculate each brand's share and credit them. Balance stays with
+            // Admin.
+            double totalModeratorPayouts = 0;
+
+            for (OrderItem item : items) {
+                Moderator mod = item.getVariant().getProduct().getModerator();
+                if (mod == null) {
+                    // Platform product - admin keeps full amount
+                    continue;
+                }
+
+                double itemTotal = item.getPrice() * item.getQuantity() * priceRatio;
+                double commission = itemTotal * (PLATFORM_COMMISSION_PERCENT / 100.0);
+                double modShare = itemTotal - commission;
+
+                totalModeratorPayouts += modShare;
+
+                walletService.creditWallet(mod.getUser(), modShare, Transaction.TransactionSource.ORDER_PAYMENT,
+                        order.getId().toString(), "Prorated share for Multi-Brand Order #" + order.getId());
+            }
+
+            double adminTotal = (subtotal - totalDiscount) - totalModeratorPayouts;
+            walletService.creditWallet(superAdmin, adminTotal, Transaction.TransactionSource.COMMISSION,
+                    order.getId().toString(),
+                    "Platform share (Commission + Internal items) for Multi-Brand Order #" + order.getId());
+        }
+    }
+
+    private User findSuperAdmin() {
+        return userRepository.findByRole(Role.SUPER_ADMIN).stream().findFirst()
+                .orElseGet(() -> userRepository.findByRole(Role.ADMIN).stream().findFirst()
+                        .orElseThrow(() -> new RuntimeException("No Admin/SuperAdmin found for commission routing")));
     }
 
     @Transactional
@@ -166,11 +249,7 @@ public class OrderService {
         // Send status update email if status actually changed
         if (oldStatus != status) {
             User user = order.getUser();
-            emailService.sendOrderStatusUpdate(
-                    user.getEmail(),
-                    orderId.toString(),
-                    status.name(),
-                    user.getName());
+            emailService.sendOrderStatusUpdate(user.getEmail(), orderId.toString(), status.name(), user.getName());
         }
 
         return savedOrder;
@@ -192,10 +271,7 @@ public class OrderService {
         Order savedOrder = orderRepository.save(order);
 
         User user = order.getUser();
-        emailService.sendOrderStatusUpdate(
-                user.getEmail(),
-                orderId.toString(),
-                OrderStatus.CANCELLED.name(),
+        emailService.sendOrderStatusUpdate(user.getEmail(), orderId.toString(), OrderStatus.CANCELLED.name(),
                 user.getName());
 
         return savedOrder;
@@ -203,16 +279,12 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<AdminOrderDTO> getAllOrdersDTO() {
-        return orderRepository.findAll().stream()
-                .map(OrderMapper::toAdminDTO)
-                .toList();
+        return orderRepository.findAll().stream().map(OrderMapper::toAdminDTO).toList();
     }
 
     @Transactional(readOnly = true)
     public List<OrderResponseDTO> getUserOrdersDTO(User user) {
-        return orderRepository.findByUser(user).stream()
-                .map(OrderMapper::toResponseDTO)
-                .toList();
+        return orderRepository.findByUser(user).stream().map(OrderMapper::toResponseDTO).toList();
     }
 
     @Transactional(readOnly = true)
@@ -239,18 +311,16 @@ public class OrderService {
         order.setCurrentLocation(location);
 
         // Add to tracking history
-        OrderTracking tracking = new OrderTracking(order, status.name(), location);
-        order.getTrackingHistory().add(tracking); // Cascaded save
+        TrackingStatus trackingStatus = TrackingStatus.valueOf(status.name());
+        OrderTracking tracking = new OrderTracking(order, trackingStatus, location, "", "Update via old endpoint");
+        order.getTrackingHistory().add(tracking); // Cascaded
+                                                  // save
 
         Order savedOrder = orderRepository.save(order);
 
         // Send email
         User user = order.getUser();
-        emailService.sendOrderTrackingUpdate(
-                user.getEmail(),
-                orderId.toString(),
-                status.name(),
-                location,
+        emailService.sendOrderTrackingUpdate(user.getEmail(), orderId.toString(), status.name(), location,
                 user.getName());
 
         return savedOrder;

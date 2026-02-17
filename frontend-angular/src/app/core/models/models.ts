@@ -20,7 +20,8 @@ export interface ProductVariant {
 }
 
 export interface Product {
-    modelNo: number; // Using modelNo as ID
+    id: number;
+    modelNo: number; // Using modelNo as ID for routing
     name: string;
     brandName: string;
     description: string;
@@ -128,7 +129,9 @@ export interface Order {
     currentLocation?: string;
     trackingHistory?: {
         status: string;
-        location: string;
+        city: string;
+        state: string;
+        description: string;
         timestamp: string;
     }[];
 }

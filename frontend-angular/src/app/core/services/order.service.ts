@@ -46,4 +46,17 @@ export class OrderService {
             { responseType: 'blob' }
         ));
     }
+
+    async getTracking(orderId: number): Promise<any[]> {
+        try {
+            return await firstValueFrom(this.http.get<any[]>(`${this.apiUrl}/${orderId}/tracking`));
+        } catch (err) {
+            console.error('Failed to fetch tracking', err);
+            return [];
+        }
+    }
+
+    async addTracking(orderId: number, trackingData: any): Promise<any> {
+        return firstValueFrom(this.http.post<any>(`${this.apiUrl}/${orderId}/tracking`, trackingData));
+    }
 }

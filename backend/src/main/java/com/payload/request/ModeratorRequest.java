@@ -56,4 +56,16 @@ public class ModeratorRequest {
      */
     @Size(max = 500, message = "Notes cannot exceed 500 characters")
     private String notes;
+
+    // Brand Details
+    private String brandName;
+    private String brandDescription;
+    private String brandLogoUrl;
+
+    // KYC Details
+    private String bankAccountNumber;
+    private String ifscCode;
+    private String panNumber;
+    private String kycStatus; // For admin updates
+    private Boolean isBrandActive; // For admin updates
 }

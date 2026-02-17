@@ -30,6 +30,9 @@ public class PaymentService {
     @Autowired
     private InvoiceService invoiceService;
 
+    @Autowired
+    private OrderService orderService;
+
     public String generateUPIString(double amount, String orderId) {
         try {
             Order order = orderRepository.findById(Long.parseLong(orderId)).orElse(null);
@@ -117,6 +120,13 @@ public class PaymentService {
         order.setPaymentStatus(PaymentStatus.COMPLETED);
         order.setPaymentReference(transactionId);
         orderRepository.save(order);
+
+        // Distribute payments to Moderator and Admin wallets
+        try {
+            orderService.distributePayments(order);
+        } catch (Exception e) {
+            System.err.println("Failed to distribute payments for order " + order.getId() + ": " + e.getMessage());
+        }
 
         // Send invoice email
         try {

@@ -9,11 +9,12 @@ import { OrderService } from '../../../core/services/order.service';
 import { environment } from '../../../../environments/environment';
 
 import { RouterLink } from '@angular/router';
+import { OrderTrackingTimelineComponent } from '../../../shared/components/order-tracking-timeline/order-tracking-timeline.component';
 
 @Component({
    selector: 'app-my-orders',
    standalone: true,
-   imports: [CommonModule, MatTabsModule, MatButtonModule, MatIconModule, MatStepperModule, RouterLink],
+   imports: [CommonModule, MatTabsModule, MatButtonModule, MatIconModule, MatStepperModule, RouterLink, OrderTrackingTimelineComponent],
    template: `
     <div class="page-container">
        <h1 class="page-title">Your Orders</h1>
@@ -138,7 +139,13 @@ import { RouterLink } from '@angular/router';
                          <div class="item-actions-stack">
                              <button class="stack-btn primary-yellow" *ngIf="order.status === 'DELIVERED'">Get product support</button>
                              
-                             <button class="stack-btn" *ngIf="order.status !== 'DELIVERED'">Track package</button>
+                             <button class="stack-btn" *ngIf="order.status !== 'DELIVERED'" (click)="toggleTracking(order)">
+                                 {{ order.showTracking ? 'Hide tracking' : 'Track package' }}
+                              </button>
+                              
+                              <div *ngIf="order.showTracking" style="margin-top: 15px; border-top: 1px solid #ddd; background: #fafafa; border-radius: 8px; width: 100%;">
+                                 <app-order-tracking-timeline [trackingHistory]="order.trackingHistory"></app-order-tracking-timeline>
+                              </div>
                              
                              <button class="stack-btn" *ngIf="order.status === 'DELIVERED' && item.product.isReturnable" (click)="returnItem(order.id, item)">Return or replace items</button>
                              
@@ -338,6 +345,20 @@ export class MyOrdersComponent {
    viewOrderDetails(orderId: number) {
       // Placeholder for potential detailed view page
       console.log('View order details', orderId);
+   }
+
+   async toggleTracking(order: any) {
+      if (!order.showTracking) {
+         // Load tracking if not already present or needs refresh
+         try {
+            order.trackingHistory = await this.orderService.getTracking(order.id);
+            order.showTracking = true;
+         } catch (err) {
+            console.error('Failed to load tracking', err);
+         }
+      } else {
+         order.showTracking = false;
+      }
    }
 
    getReturnDate(orderDate: string): Date {

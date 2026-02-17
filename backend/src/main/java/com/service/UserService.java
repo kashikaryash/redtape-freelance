@@ -125,4 +125,15 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(Objects.requireNonNull(user));
     }
+
+    /**
+     * Get user from security principal.
+     */
+    public User getUserFromPrincipal(java.security.Principal principal) {
+        if (principal == null) {
+            throw new RuntimeException("Principal is null");
+        }
+        return userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + principal.getName()));
+    }
 }

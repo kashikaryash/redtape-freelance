@@ -20,19 +20,28 @@ public class OrderTracking {
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private TrackingStatus status;
 
     @Column(nullable = false)
-    private String location;
+    private String city;
+
+    @Column(nullable = false)
+    private String state;
+
+    @Column(length = 500)
+    private String description;
 
     @Column(nullable = false)
     private LocalDateTime timestamp;
 
-    public OrderTracking(Order order, String status, String location) {
+    public OrderTracking(Order order, TrackingStatus status, String city, String state, String description) {
         this.order = order;
         this.status = status;
-        this.location = location;
+        this.city = city;
+        this.state = state;
+        this.description = description;
         this.timestamp = LocalDateTime.now();
     }
 }

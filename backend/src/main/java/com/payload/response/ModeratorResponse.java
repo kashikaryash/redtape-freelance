@@ -41,4 +41,16 @@ public class ModeratorResponse {
     private Long assignedBy;
     private Boolean isActive;
     private String notes;
+
+    // Brand Details
+    private String brandName;
+    private String brandDescription;
+    private String brandLogoUrl;
+
+    // KYC Details
+    private String bankAccountNumber;
+    private String ifscCode;
+    private String panNumber;
+    private String kycStatus;
+    private Boolean isBrandActive;
 }

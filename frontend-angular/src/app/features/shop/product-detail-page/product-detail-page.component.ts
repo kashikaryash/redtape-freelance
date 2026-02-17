@@ -153,6 +153,20 @@ import { Product, ProductVariant } from '../../../core/models/models';
                          placeholder="Enter pincode" [(ngModel)]="pincode" maxlength="6">
                   <button class="btn btn-outline-primary fw-bold" (click)="checkPincode()">Check</button>
                </div>
+               
+               <div class="mt-2" *ngIf="deliveryResponse()">
+                  <div *ngIf="deliveryResponse()?.serviceable; else notServiceable" class="text-success small fw-bold d-flex align-items-center gap-1">
+                     <mat-icon style="font-size: 16px; width: 16px; height: 16px;">check_circle</mat-icon>
+                     Delivery by {{ deliveryResponse()?.estimatedDeliveryDate | date:'fullDate' }}
+                  </div>
+                  <ng-template #notServiceable>
+                     <div class="text-danger small fw-bold d-flex align-items-center gap-1">
+                        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">error</mat-icon>
+                        {{ deliveryResponse()?.message || 'Delivery not available' }}
+                     </div>
+                  </ng-template>
+               </div>
+
                <div class="mt-2 d-flex flex-column gap-1 small text-muted">
                   <div class="d-flex align-items-center gap-2">
                      <mat-icon style="font-size: 16px; width: 16px; height: 16px;">local_shipping</mat-icon>
@@ -500,11 +514,21 @@ export class ProductDetailPageComponent implements OnInit {
       this.router.navigate(['/checkout']);
    }
 
-   checkPincode() {
+   deliveryResponse = signal<any>(null);
+
+   async checkPincode() {
       if (this.pincode.length === 6 && !isNaN(Number(this.pincode))) {
-         this.snackBar.open('Delivery available', 'OK', { duration: 3000 });
+         try {
+            const product = this.product();
+            if (!product) return;
+            const res = await this.productService.checkDelivery(product.id, this.pincode);
+            this.deliveryResponse.set(res);
+         } catch (err) {
+            this.snackBar.open('Failed to check pincode', 'Close');
+         }
       } else {
          this.snackBar.open('Invalid pincode', 'Retry');
+         this.deliveryResponse.set(null);
       }
    }
 

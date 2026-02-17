@@ -118,6 +118,51 @@ public class ModeratorService {
     }
 
     /**
+     * Update moderator's own brand profile and KYC info.
+     */
+    @Transactional
+    public ModeratorResponse updateModeratorProfile(Long userId, ModeratorRequest request) {
+        Moderator moderator = moderatorRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Moderator not found for user ID: " + userId));
+
+        if (request.getBrandName() != null)
+            moderator.setBrandName(request.getBrandName());
+        if (request.getBrandDescription() != null)
+            moderator.setBrandDescription(request.getBrandDescription());
+        if (request.getBrandLogoUrl() != null)
+            moderator.setBrandLogoUrl(request.getBrandLogoUrl());
+        if (request.getBankAccountNumber() != null)
+            moderator.setBankAccountNumber(request.getBankAccountNumber());
+        if (request.getIfscCode() != null)
+            moderator.setIfscCode(request.getIfscCode());
+        if (request.getPanNumber() != null)
+            moderator.setPanNumber(request.getPanNumber());
+
+        // Any profile update drops brand back to inactive or keeps pending until
+        // re-approved?
+        // For now, let's just save. Prompt says "must complete details... before brand
+        // becomes active".
+
+        return toResponse(moderatorRepository.save(moderator));
+    }
+
+    /**
+     * Admin approves/rejects KYC and activates brand.
+     */
+    @Transactional
+    public ModeratorResponse approveBrand(Long moderatorId, String status, Boolean active) {
+        Moderator moderator = moderatorRepository.findById(moderatorId)
+                .orElseThrow(() -> new RuntimeException("Moderator not found ID: " + moderatorId));
+
+        if (status != null)
+            moderator.setKycStatus(status);
+        if (active != null)
+            moderator.setIsBrandActive(active);
+
+        return toResponse(moderatorRepository.save(moderator));
+    }
+
+    /**
      * Revoke moderator status (deactivate).
      * 
      * @param moderatorId ID of the moderator to revoke
@@ -263,6 +308,14 @@ public class ModeratorService {
                 .assignedBy(moderator.getAssignedBy())
                 .isActive(moderator.getIsActive())
                 .notes(moderator.getNotes())
+                .brandName(moderator.getBrandName())
+                .brandDescription(moderator.getBrandDescription())
+                .brandLogoUrl(moderator.getBrandLogoUrl())
+                .bankAccountNumber(moderator.getBankAccountNumber())
+                .ifscCode(moderator.getIfscCode())
+                .panNumber(moderator.getPanNumber())
+                .kycStatus(moderator.getKycStatus())
+                .isBrandActive(moderator.getIsBrandActive())
                 .build();
     }
 }

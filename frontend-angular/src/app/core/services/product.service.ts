@@ -170,5 +170,14 @@ export class ProductService {
             throw err;
         }
     }
+
+    async checkDelivery(productId: number, pincode: string): Promise<any> {
+        try {
+            return await firstValueFrom(this.http.post<any>(`${environment.apiUrl}/delivery/check`, { productId, destinationPincode: pincode }));
+        } catch (err) {
+            console.error('Delivery check failed:', err);
+            throw err;
+        }
+    }
 }
 

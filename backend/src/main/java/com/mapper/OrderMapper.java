@@ -49,8 +49,8 @@ public class OrderMapper {
                                 order.getUser().getProfilePictureType());
 
                 List<com.dto.OrderTrackingDTO> trackingHistory = order.getTrackingHistory().stream()
-                                .map(t -> new com.dto.OrderTrackingDTO(t.getStatus(), t.getLocation(),
-                                                t.getTimestamp()))
+                                .map(t -> new com.dto.OrderTrackingDTO(t.getStatus().name(), t.getCity(), t.getState(),
+                                                t.getDescription(), t.getTimestamp()))
                                 .toList();
 
                 return new OrderResponseDTO(

@@ -107,8 +107,54 @@ public class Moderator {
     /**
      * Admin notes about this moderator.
      */
+    /**
+     * Admin notes about this moderator.
+     */
     @Column(length = 500)
     private String notes;
+
+    // ==================== BRAND DETAILS ====================
+
+    @Column(length = 100)
+    private String brandName;
+
+    @Column(length = 1000)
+    private String brandDescription;
+
+    @Column(length = 255)
+    private String brandLogoUrl;
+
+    // ==================== KYC / FINANCIAL DETAILS ====================
+
+    @Column(length = 50)
+    private String bankAccountNumber;
+
+    @Column(length = 20)
+    private String ifscCode;
+
+    @Column(length = 20)
+    private String panNumber;
+
+    @Column(length = 20)
+    private String kycStatus = "PENDING"; // PENDING, APPROVED, REJECTED
+
+    /**
+     * Whether the brand is active and visible to customers.
+     * Use this to correct "isBrandActive" mentioned in plan.
+     */
+    @Column(nullable = false)
+    private Boolean isBrandActive = false;
+
+    // ==================== WAREHOUSE DETAILS ====================
+
+    @Column(length = 255)
+    private String warehouseCity;
+
+    @Column(length = 255)
+    private String warehouseState;
+
+    @Column(length = 6)
+    private String warehousePincode;
 
     /**
      * Set assignment timestamp before persisting.
