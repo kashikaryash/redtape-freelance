@@ -1,0 +1,272 @@
+<div class="navbar-wrapper" [class.dark-mode]="isDarkMode()">
+    <!-- Top Action Bar -->
+    <div class="top-bar">
+        <div class="container actions-container">
+            <!-- Logo -->
+            <a href="/" class="logo" (click)="handleLogoClick($event)">
+                <mat-icon class="logo-icon">shopping_cart</mat-icon>
+                <div class="logo-text">
+                    <span class="brand-name">SnapCart</span>
+                    <span class="brand-tagline">Small scale, big choice</span>
+                </div>
+            </a>
+
+            <!-- Search Area (Wide) -->
+            <div class="search-central">
+                <app-search-dropdown></app-search-dropdown>
+            </div>
+
+            <!-- Profile, Cart, Wishlist -->
+            <div class="action-icons">
+                <button mat-icon-button (click)="toggleTheme()" matTooltip="Toggle theme">
+                    <mat-icon>{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+                </button>
+
+                <button mat-icon-button routerLink="/wishlist" matTooltip="Wishlist">
+                    <mat-icon [matBadge]="wishlistCount()" matBadgeColor="warn" [matBadgeHidden]="wishlistCount() === 0"
+                        aria-hidden="false">
+                        favorite_border
+                    </mat-icon>
+                </button>
+
+                <app-animated-cart-counter></app-animated-cart-counter>
+
+                <div class="user-control">
+                    @if (user()) {
+                    <button mat-button [matMenuTriggerFor]="userMenu" class="user-btn">
+                        <mat-icon>account_circle</mat-icon>
+                        <span class="user-name">Profile</span>
+                    </button>
+                    } @else {
+                    <div class="auth-guest">
+                        <button mat-button routerLink="/login" class="login-link">Sign In</button>
+                        <button mat-flat-button color="primary" routerLink="/signup" class="join-btn">Join</button>
+                    </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Mobile Toggle -->
+            <button mat-icon-button class="mobile-menu-btn" (click)="toggleMobileMenu()">
+                <mat-icon>menu</mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- Category Strip -->
+    <div class="category-strip">
+        <div class="container nav-container">
+            <div class="category-nav">
+                @for (category of categories; track category) {
+                <div class="nav-item" (mouseenter)="setHovered(category)" (mouseleave)="setHovered(null)">
+                    <a [routerLink]="getCategoryPath(category)" class="nav-link">
+                        {{ getCategoryLabel(category) }}
+                    </a>
+
+                    @if (hoveredCategory() === category) {
+                    <div class="mega-menu">
+                        <div class="mega-menu-content">
+                            @if (category === 'MEN') {
+                            <div class="menu-col">
+                                <h3 class="menu-title">FOOTWEAR</h3>
+                                <ul>
+                                    <li><a routerLink="/cat/MEN/BOOTS">Boots</a></li>
+                                    <li><a routerLink="/cat/MEN/CASUAL">Casual</a></li>
+                                    <li><a routerLink="/cat/MEN/FORMALSHOES">Formal Shoes</a></li>
+                                    <li><a routerLink="/cat/MEN/SPORTSSHOES">Sports Shoes</a></li>
+                                </ul>
+                            </div>
+                            <div class="menu-col">
+                                <h3 class="menu-title">CLOTHING</h3>
+                                <ul>
+                                    <li><a routerLink="/cat/MEN/SHIRTS">Shirts</a></li>
+                                    <li><a routerLink="/cat/MEN/T_SHIRTS">T-Shirts</a></li>
+                                    <li><a routerLink="/cat/MEN/JEANS">Jeans</a></li>
+                                </ul>
+                            </div>
+                            } @else if (category === 'WOMEN') {
+                            <div class="menu-col">
+                                <h3 class="menu-title">CLOTHING</h3>
+                                <ul>
+                                    <li><a routerLink="/cat/WOMEN/DRESSES">Dresses</a></li>
+                                    <li><a routerLink="/cat/WOMEN/TOPS_T_SHIRTS">Tops & T-shirts</a></li>
+                                    <li><a routerLink="/cat/WOMEN/JACKETS">Jackets</a></li>
+                                </ul>
+                            </div>
+                            <div class="menu-col">
+                                <h3 class="menu-title">FOOTWEAR</h3>
+                                <ul>
+                                    <li><a routerLink="/cat/WOMEN/CASUAL_SHOES">Casual Shoes</a></li>
+                                    <li><a routerLink="/cat/WOMEN/SLIDERS_FLIP_FLOPS">Sliders</a></li>
+                                </ul>
+                            </div>
+                            } @else if (category === 'ELECTRONICS') {
+                            <div class="menu-col">
+                                <h3 class="menu-title">MOBILES & LAPTOPS</h3>
+                                <ul>
+                                    <li><a routerLink="/cat/ELECTRONICS/SMARTPHONES">Smartphones</a></li>
+                                    <li><a routerLink="/cat/ELECTRONICS/LAPTOPS">Laptops</a></li>
+                                </ul>
+                            </div>
+                            <div class="menu-col">
+                                <h3 class="menu-title">ACCESSORIES</h3>
+                                <ul>
+                                    <li><a routerLink="/cat/ELECTRONICS/HEADPHONES">Headphones</a></li>
+                                    <li><a routerLink="/cat/ELECTRONICS/SMARTWATCHES">Smartwatches</a></li>
+                                </ul>
+                            </div>
+                            } @else if (category === 'HOME_KITCHEN') {
+                            <div class="menu-col">
+                                <h3 class="menu-title">DECOR</h3>
+                                <ul>
+                                    <li><a routerLink="/cat/HOME_KITCHEN/HOME_DECOR">Home Decor</a></li>
+                                    <li><a routerLink="/cat/HOME_KITCHEN/BEDDING">Bedding</a></li>
+                                </ul>
+                            </div>
+                            <div class="menu-col">
+                                <h3 class="menu-title">KITCHEN</h3>
+                                <ul>
+                                    <li><a routerLink="/cat/HOME_KITCHEN/KITCHEN_APPLIANCES">Kitchen Appliances</a></li>
+                                </ul>
+                            </div>
+                            } @else if (category === 'BEAUTY') {
+                            <div class="menu-col">
+                                <h3 class="menu-title">CARE</h3>
+                                <ul>
+                                    <li><a routerLink="/cat/BEAUTY/SKINCARE">Skincare</a></li>
+                                    <li><a routerLink="/cat/BEAUTY/HAIRCARE">Haircare</a></li>
+                                </ul>
+                            </div>
+                            <div class="menu-col">
+                                <h3 class="menu-title">MAKEUP</h3>
+                                <ul>
+                                    <li><a routerLink="/cat/BEAUTY/MAKEUP">Makeup</a></li>
+                                </ul>
+                            </div>
+                            } @else if (category === 'KIDS') {
+                            <div class="menu-col">
+                                <h3 class="menu-title">BOYS & GIRLS</h3>
+                                <ul>
+                                    <li><a routerLink="/cat/KIDS/CASUAL">Boys Casual</a></li>
+                                    <li><a routerLink="/cat/KIDS/DRESSES">Girls Dresses</a></li>
+                                </ul>
+                            </div>
+                            } @else if (category === 'ACCESSORIES') {
+                            <div class="menu-col">
+                                <h3 class="menu-title">WATCHES & MORE</h3>
+                                <ul>
+                                    <li><a routerLink="/cat/ACCESSORIES/WATCHES">Watches</a></li>
+                                    <li><a routerLink="/cat/ACCESSORIES/SUNGLASSES">Sunglasses</a></li>
+                                </ul>
+                            </div>
+                            } @else if (category === 'JEWELLERY') {
+                            <div class="menu-col">
+                                <h3 class="menu-title">FINE JEWELLERY</h3>
+                                <ul>
+                                    <li><a routerLink="/cat/JEWELLERY/NECKLACES">Necklaces</a></li>
+                                    <li><a routerLink="/cat/JEWELLERY/EARRINGS">Earrings</a></li>
+                                </ul>
+                            </div>
+                            } @else if (category === 'BAGS_FOOTWEAR') {
+                            <div class="menu-col">
+                                <h3 class="menu-title">BAGS</h3>
+                                <ul>
+                                    <li><a routerLink="/cat/BAGS_FOOTWEAR/HANDBAGS">Handbags</a></li>
+                                    <li><a routerLink="/cat/BAGS_FOOTWEAR/BACKPACKS">Backpacks</a></li>
+                                </ul>
+                            </div>
+                            }
+                        </div>
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- User Menu Template -->
+    <mat-menu #userMenu="matMenu" xPosition="before" class="premium-menu">
+        <div class="menu-header" *ngIf="user()">
+            <span class="welcome">Welcome,</span>
+            <span class="name">{{ user().name }}</span>
+        </div>
+        <mat-divider></mat-divider>
+        <button mat-menu-item routerLink="/my-profile">
+            <mat-icon>person</mat-icon>
+            <span>My Profile</span>
+        </button>
+        <button mat-menu-item routerLink="/my-orders">
+            <mat-icon>shopping_bag</mat-icon>
+            <span>My Orders</span>
+        </button>
+        @if (primaryRole() === 'ADMIN' || primaryRole() === 'SUPER_ADMIN') {
+        <button mat-menu-item routerLink="/admin/dashboard">
+            <mat-icon>admin_panel_settings</mat-icon>
+            <span>Admin Dashboard</span>
+        </button>
+        }
+        @if (primaryRole() === 'SUPER_ADMIN') {
+        <button mat-menu-item routerLink="/super-admin/dashboard">
+            <mat-icon>security</mat-icon>
+            <span>SuperAdmin Control</span>
+        </button>
+        }
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Sign Out</span>
+        </button>
+    </mat-menu>
+</div>
+
+<!-- Mobile Side Drawer -->
+<div class="mobile-drawer" [class.open]="isMobileMenuOpen()">
+    <div class="drawer-header">
+        <h3>Menu</h3>
+        <button mat-icon-button (click)="toggleMobileMenu()">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div class="drawer-content">
+        @for (cat of categories; track cat) {
+        <div class="mobile-nav-item">
+            <div class="nav-expand-header">
+                <a [routerLink]="getCategoryPath(cat)" (click)="toggleMobileMenu()" class="mobile-cat-link">
+                    {{ getCategoryLabel(cat) }}
+                </a>
+                <mat-icon (click)="toggleMobileCategory(cat)">{{ mobileCategoryExpanded() === cat ? 'expand_less' :
+                    'expand_more' }}</mat-icon>
+            </div>
+            <div class="sub-menu" *ngIf="mobileCategoryExpanded() === cat">
+                @if (cat === 'MEN') {
+                <a routerLink="/cat/MEN/CASUAL" (click)="toggleMobileMenu()">Footwear</a>
+                <a routerLink="/cat/MEN/SHIRTS" (click)="toggleMobileMenu()">Clothing</a>
+                } @else if (cat === 'WOMEN') {
+                <a routerLink="/cat/WOMEN/CASUAL_SHOES" (click)="toggleMobileMenu()">Footwear</a>
+                <a routerLink="/cat/WOMEN/DRESSES" (click)="toggleMobileMenu()">Clothing</a>
+                } @else if (cat === 'ELECTRONICS') {
+                <a routerLink="/cat/ELECTRONICS/SMARTPHONES" (click)="toggleMobileMenu()">Smartphones</a>
+                <a routerLink="/cat/ELECTRONICS/LAPTOPS" (click)="toggleMobileMenu()">Laptops</a>
+                } @else if (cat === 'HOME_KITCHEN') {
+                <a routerLink="/cat/HOME_KITCHEN/HOME_DECOR" (click)="toggleMobileMenu()">Decor</a>
+                <a routerLink="/cat/HOME_KITCHEN/KITCHEN_APPLIANCES" (click)="toggleMobileMenu()">Appliances</a>
+                } @else if (cat === 'BEAUTY') {
+                <a routerLink="/cat/BEAUTY/SKINCARE" (click)="toggleMobileMenu()">Skincare</a>
+                <a routerLink="/cat/BEAUTY/MAKEUP" (click)="toggleMobileMenu()">Makeup</a>
+                } @else if (cat === 'KIDS') {
+                <a routerLink="/cat/KIDS/CASUAL" (click)="toggleMobileMenu()">Boys</a>
+                <a routerLink="/cat/KIDS/DRESSES" (click)="toggleMobileMenu()">Girls</a>
+                } @else if (cat === 'ACCESSORIES') {
+                <a routerLink="/cat/ACCESSORIES/WATCHES" (click)="toggleMobileMenu()">Watches</a>
+                } @else if (cat === 'JEWELLERY') {
+                <a routerLink="/cat/JEWELLERY/NECKLACES" (click)="toggleMobileMenu()">Necklaces</a>
+                } @else if (cat === 'BAGS_FOOTWEAR') {
+                <a routerLink="/cat/BAGS_FOOTWEAR/HANDBAGS" (click)="toggleMobileMenu()">Handbags</a>
+                }
+            </div>
+        </div>
+        }
+    </div>
+</div>
+<div class="mobile-overlay" *ngIf="isMobileMenuOpen()" (click)="toggleMobileMenu()"></div>

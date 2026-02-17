@@ -1,0 +1,336 @@
+@use "sass:color";
+
+:host {
+    display: block;
+    width: 100%;
+}
+
+.navbar-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+    background-color: #4DC4B0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* ---------- Top Bar (Actions) ---------- */
+.top-bar {
+    height: 80px;
+    background: #4DC4B0;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    .actions-container {
+        height: 100%;
+        display: grid;
+        grid-template-columns: 240px 1fr 320px;
+        align-items: center;
+        gap: 2rem;
+    }
+}
+
+
+
+/* Logo */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+
+    .logo-icon {
+        font-size: 36px;
+        width: 36px;
+        height: 36px;
+        color: var(--primary);
+    }
+
+    .logo-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1;
+
+        .brand-name {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-tagline {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+    }
+}
+
+/* Search Area */
+.search-central {
+    width: 100%;
+    max-width: 600px;
+    justify-self: center;
+}
+
+/* Icons & Actions */
+.action-icons {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+
+    .icon-btn {
+        color: #ffffff;
+        transition: all 0.2s;
+
+        &:hover {
+            color: #1a1a2e;
+            background: rgba(255, 255, 255, 0.2);
+        }
+    }
+}
+
+.user-control {
+    margin-left: 12px;
+    padding-left: 12px;
+    border-left: 1px solid var(--border-light);
+
+    .auth-guest {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        .login-link {
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .join-btn {
+            border-radius: 20px;
+            font-weight: 700;
+            padding: 0 1.25rem;
+        }
+    }
+}
+
+/* ---------- Category Strip ---------- */
+.category-strip {
+    height: 50px;
+    background: #4DC4B0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    .nav-container {
+        height: 100%;
+        justify-content: center;
+    }
+}
+
+
+
+.category-nav {
+    display: flex;
+    height: 100%;
+    gap: 3rem;
+}
+
+.nav-item {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+
+    .nav-link {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #ffffff;
+        cursor: pointer;
+        transition: color 0.2s;
+
+        &:hover {
+            color: #1a1a2e;
+        }
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 3px;
+        background: var(--primary);
+        transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        border-radius: 3px 3px 0 0;
+    }
+
+    &:hover::after {
+        width: 100%;
+    }
+}
+
+/* ---------- Mega Menu ---------- */
+.mega-menu {
+    position: absolute;
+    top: 50px;
+    /* Exact height of category strip */
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface-elevated);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 16px 16px;
+    min-width: 600px;
+    padding: 2rem;
+    z-index: 1001;
+    animation: menuFade 0.3s ease-out;
+}
+
+@keyframes menuFade {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+.mega-menu-content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+}
+
+.menu-col {
+    .menu-title {
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: var(--primary);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+    }
+
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            transition: all 0.2s;
+
+            &:hover {
+                color: var(--text-main);
+                padding-left: 5px;
+            }
+        }
+    }
+}
+
+/* ---------- Mobile Responsive ---------- */
+.mobile-menu-btn {
+    display: none;
+}
+
+@media (max-width: 991px) {
+    .top-bar {
+        height: 70px;
+
+        .actions-container {
+            grid-template-columns: auto 1fr auto;
+            gap: 1rem;
+        }
+    }
+
+    .search-central,
+    .category-strip,
+    .user-control {
+        display: none;
+    }
+
+    .mobile-menu-btn {
+        display: block;
+    }
+}
+
+/* Mobile Drawer */
+.mobile-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100%;
+    background: var(--surface);
+    z-index: 2000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
+
+    &.open {
+        transform: translateX(0);
+    }
+}
+
+.drawer-header {
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.drawer-content {
+    padding: 1rem;
+
+    .mobile-nav-item {
+        border-bottom: 1px solid var(--border-light);
+
+        .nav-expand-header {
+            padding: 1rem 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+        }
+
+        .sub-menu {
+            padding: 0.5rem 1rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+
+            a {
+                text-decoration: none;
+                color: var(--text-secondary);
+            }
+        }
+    }
+}
+
+.mobile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1999;
+}
