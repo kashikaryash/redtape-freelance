@@ -431,6 +431,7 @@ export class ProductDetailPageComponent implements OnInit {
    }
 
    handleMainImageError() {
+      console.warn('Failed to load product image:', this.currentMainImage());
       this.mainImage.set('https://placehold.co/600x600/e2e8f0/64748b?text=No+Image');
    }
 

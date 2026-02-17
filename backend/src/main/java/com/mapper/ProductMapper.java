@@ -98,9 +98,8 @@ public class ProductMapper {
                 .map(img -> {
                     ProductVariantDTO.ProductImageDTO imgDto = new ProductVariantDTO.ProductImageDTO();
                     imgDto.setId(img.getId());
-                    // Point to the ImageController endpoint that serves by ID
-                    imgDto.setImageUrl(
-                            "https://zestful-recreation-production.up.railway.app/api/images/" + img.getId());
+                    // Use relative path; the frontend will prepend the correct API base URL
+                    imgDto.setImageUrl("/api/images/" + img.getId());
                     imgDto.setPrimary(img.isPrimary());
                     return imgDto;
                 }).collect(Collectors.toList());

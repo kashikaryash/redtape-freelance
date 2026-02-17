@@ -360,12 +360,6 @@ public class AdminProductController {
 
         // --- Synchronize sizes/variants ---
         if (sizes != null && !sizes.isEmpty()) {
-            // Store common images from an existing variant to reuse for new sizes
-            List<String> currentImageUrls = new ArrayList<>();
-            if (!product.getVariants().isEmpty()) {
-                currentImageUrls = product.getVariants().get(0).getImages().stream()
-                        .map(com.entity.ProductImage::getImageUrl).toList();
-            }
 
             // Remove variants not in the new sizes list
             try {
@@ -399,11 +393,14 @@ public class AdminProductController {
 
                     // Copy existing images to the new variant if no new ones provided
                     if (image1 == null && image2 == null && image3 == null && image4 == null && image5 == null) {
-                        for (String url : currentImageUrls) {
-                            com.entity.ProductImage img = new com.entity.ProductImage();
-                            img.setVariant(v);
-                            img.setImageUrl(url);
-                            v.getImages().add(img);
+                        for (com.entity.ProductImage originalImg : product.getVariants().get(0).getImages()) {
+                            com.entity.ProductImage newImg = new com.entity.ProductImage();
+                            newImg.setVariant(v);
+                            newImg.setImageUrl(originalImg.getImageUrl());
+                            newImg.setImageData(originalImg.getImageData());
+                            newImg.setImageType(originalImg.getImageType());
+                            newImg.setPrimary(originalImg.isPrimary());
+                            v.getImages().add(newImg);
                         }
                     }
                 }
