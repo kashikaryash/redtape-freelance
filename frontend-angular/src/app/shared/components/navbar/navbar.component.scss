@@ -131,6 +131,7 @@
     .nav-container {
         height: 100%;
         justify-content: center;
+        position: relative;
     }
 }
 
@@ -143,7 +144,7 @@
 }
 
 .nav-item {
-    position: relative;
+    position: static;
     height: 100%;
     display: flex;
     align-items: center;
@@ -154,26 +155,28 @@
         color: #ffffff;
         cursor: pointer;
         transition: color 0.2s;
+        position: relative;
+        padding: 0.5rem 0;
 
         &:hover {
             color: #1a1a2e;
         }
-    }
 
-    &::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 0;
-        height: 3px;
-        background: var(--primary);
-        transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        border-radius: 3px 3px 0 0;
-    }
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: var(--primary);
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 3px 3px 0 0;
+        }
 
-    &:hover::after {
-        width: 100%;
+        &:hover::after {
+            width: 100%;
+        }
     }
 }
 
