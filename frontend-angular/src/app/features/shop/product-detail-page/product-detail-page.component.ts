@@ -29,7 +29,7 @@ import { Product, ProductVariant } from '../../../core/models/models';
       <div class="row g-5">
         <!-- Left: Product Images -->
         <div class="col-md-6">
-          <div class="border rounded shadow-sm p-3 surface sticky-top" style="top: 100px;">
+          <div class="border rounded shadow-sm p-3 surface sticky-top" style="top: 140px;">
             <div class="position-relative main-image-container mb-3 bg-subtle-theme rounded overflow-hidden">
                 <img [src]="currentMainImage() || 'assets/placeholder.png'" 
                      alt="Main" class="img-fluid w-100 object-fit-contain" style="height: 500px;"
