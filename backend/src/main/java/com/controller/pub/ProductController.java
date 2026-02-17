@@ -81,7 +81,7 @@ public class ProductController {
                 if (!v.getImages().isEmpty()) {
                     String url = v.getImages().get(0).getImageUrl();
                     if (url != null && url.startsWith("/")) {
-                        url = "http://localhost:8080" + url;
+                        url = "https://steadfast-rejoicing-production.up.railway.app" + url;
                     }
                     dto.setImage1(url);
                 }

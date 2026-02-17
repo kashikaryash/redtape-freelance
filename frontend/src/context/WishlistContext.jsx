@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useAuth } from './AuthContext';
 
 const WishlistContext = createContext(null);
-const API_URL = 'http://localhost:8080/api';
+const API_URL = 'https://steadfast-rejoicing-production.up.railway.app/api';
 
 export const WishlistProvider = ({ children }) => {
     const [wishlist, setWishlist] = useState({ items: [] });

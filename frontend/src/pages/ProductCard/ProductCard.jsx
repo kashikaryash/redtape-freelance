@@ -46,7 +46,7 @@ function ProductCard({ product, onViewDetails }) {
     if (legacyUrl && legacyUrl.trim() !== '') {
       return legacyUrl;
     }
-    return `http://localhost:8080/api/images/product/${product.modelNo}/${imageNum}`;
+    return `https://steadfast-rejoicing-production.up.railway.app/api/images/product/${product.modelNo}/${imageNum}`;
   };
 
   return (

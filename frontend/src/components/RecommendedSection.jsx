@@ -11,7 +11,7 @@ const RecommendedSection = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const scrollRef = React.useRef(null);
-    const API_URL = 'http://localhost:8080/api';
+    const API_URL = 'https://steadfast-rejoicing-production.up.railway.app/api';
 
     useEffect(() => {
         const fetchRecommendations = async () => {

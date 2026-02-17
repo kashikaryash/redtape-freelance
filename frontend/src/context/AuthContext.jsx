@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const AuthContext = createContext(null);
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = 'https://steadfast-rejoicing-production.up.railway.app/api';
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);

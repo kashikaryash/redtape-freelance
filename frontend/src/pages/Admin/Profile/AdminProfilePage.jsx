@@ -19,7 +19,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import PhoneInput from '../../../components/PhoneInput/PhoneInput';
 import ProfileHeader from '../../../components/ProfileHeader';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = 'https://steadfast-rejoicing-production.up.railway.app/api';
 
 function AdminProfilePage() {
     const { user, logout } = useAuth();

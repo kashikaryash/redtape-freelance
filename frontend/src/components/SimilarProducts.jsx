@@ -4,7 +4,7 @@ import { Box, Typography, Grid, Card, CardMedia, CardContent, Skeleton, useTheme
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = 'https://steadfast-rejoicing-production.up.railway.app/api';
 
 const SimilarProducts = ({ currentProductId }) => {
     const [products, setProducts] = useState([]);

@@ -40,7 +40,7 @@ import {
     Area
 } from 'recharts';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = 'https://steadfast-rejoicing-production.up.railway.app/api';
 
 const StatCard = ({ title, value, icon: Icon, gradient, subtitle }) => (
     <motion.div

@@ -9,7 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useCart } from '../../../context/CartContext';
 import Navbar from '../../../components/Navbar';
 
-const baseUrl = 'http://localhost:8080';
+const baseUrl = 'https://steadfast-rejoicing-production.up.railway.app';
 
 function CatsAndSubCats() {
   const { cat, subcategory } = useParams();

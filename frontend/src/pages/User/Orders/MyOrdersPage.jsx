@@ -12,7 +12,7 @@ import {
 import { Stepper, Step, StepLabel } from '@mui/material';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = 'https://steadfast-rejoicing-production.up.railway.app/api';
 
 function MyOrdersPage() {
     const { user } = useAuth();

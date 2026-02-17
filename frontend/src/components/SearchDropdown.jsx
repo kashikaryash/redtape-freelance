@@ -4,7 +4,7 @@ import { FaSearch, FaTimes } from 'react-icons/fa';
 import axios from 'axios';
 import './SearchDropdown.css';
 
-const baseUrl = 'http://localhost:8080';
+const baseUrl = 'https://steadfast-rejoicing-production.up.railway.app';
 
 function SearchDropdown() {
     const [query, setQuery] = useState('');

@@ -178,6 +178,9 @@ public class SecurityConfig {
                 return http.build();
         }
 
+        @org.springframework.beans.factory.annotation.Value("${app.cors.allowed-origins:http://localhost:4200,http://localhost:3000}")
+        private String allowedOrigins;
+
         /**
          * Defines global CORS configuration.
          *
@@ -195,10 +198,8 @@ public class SecurityConfig {
                 CorsConfiguration config = new CorsConfiguration();
 
                 // Use allowedOriginPatterns when allowCredentials = true
-                config.setAllowedOriginPatterns(
-                                List.of(
-                                                "http://localhost:*",
-                                                "http://127.0.0.1:*"));
+                List<String> origins = List.of(allowedOrigins.split(","));
+                config.setAllowedOriginPatterns(origins);
 
                 config.setAllowedMethods(
                                 List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));

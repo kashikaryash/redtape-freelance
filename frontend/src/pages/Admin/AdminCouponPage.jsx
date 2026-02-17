@@ -23,7 +23,7 @@ import {
 } from '@mui/material';
 import { Add, Delete, Edit } from '@mui/icons-material';
 
-const API_URL = 'http://localhost:8080/api/admin/coupons';
+const API_URL = 'https://steadfast-rejoicing-production.up.railway.app/api/admin/coupons';
 
 const AdminCouponPage = () => {
     const [coupons, setCoupons] = useState([]);

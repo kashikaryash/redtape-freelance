@@ -10,7 +10,7 @@ const HeroSlider = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    const API_URL = 'http://localhost:8080/api';
+    const API_URL = 'https://steadfast-rejoicing-production.up.railway.app/api';
 
     useEffect(() => {
         const fetchFeatured = async () => {

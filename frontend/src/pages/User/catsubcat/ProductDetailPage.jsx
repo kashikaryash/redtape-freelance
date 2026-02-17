@@ -9,7 +9,7 @@ import Navbar from '../../../components/Navbar';
 import SimilarProducts from '../../../components/SimilarProducts';
 import { FaStar, FaRegStar, FaUser } from 'react-icons/fa';
 
-const baseUrl = 'http://localhost:8080';
+const baseUrl = 'https://steadfast-rejoicing-production.up.railway.app';
 
 function ProductDetailPage() {
   const { modelNo } = useParams();

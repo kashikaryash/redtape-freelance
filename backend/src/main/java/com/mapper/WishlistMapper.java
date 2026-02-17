@@ -47,7 +47,7 @@ public class WishlistMapper {
             }
 
             if (url != null && url.startsWith("/")) {
-                url = "http://localhost:8080" + url;
+                url = "https://steadfast-rejoicing-production.up.railway.app" + url;
             }
             dto.setImageUrl(url);
 

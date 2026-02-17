@@ -38,7 +38,7 @@ public class CartMapper {
                 }
 
                 if (imageUrl != null && imageUrl.startsWith("/")) {
-                        imageUrl = "http://localhost:8080" + imageUrl;
+                        imageUrl = "https://steadfast-rejoicing-production.up.railway.app" + imageUrl;
                 }
 
                 ProductSummaryDTO productDTO = new ProductSummaryDTO(

@@ -31,7 +31,7 @@ const ForgotPasswordPage = () => {
         if (!email) return toast.error("Please enter your email");
         setLoading(true);
         try {
-            await axios.post('http://localhost:8080/api/auth/otp/send', { email });
+            await axios.post('https://steadfast-rejoicing-production.up.railway.app/api/auth/otp/send', { email });
             toast.success("OTP sent to your email");
             setActiveStep(1);
         } catch (err) {
@@ -45,7 +45,7 @@ const ForgotPasswordPage = () => {
         if (!otp) return toast.error("Please enter OTP");
         setLoading(true);
         try {
-            await axios.post('http://localhost:8080/api/auth/otp/verify', { email, otp });
+            await axios.post('https://steadfast-rejoicing-production.up.railway.app/api/auth/otp/verify', { email, otp });
             toast.success("OTP Verified");
             setActiveStep(2);
         } catch (err) {
@@ -60,7 +60,7 @@ const ForgotPasswordPage = () => {
         if (newPassword !== confirmPassword) return toast.error("Passwords do not match");
         setLoading(true);
         try {
-            await axios.post('http://localhost:8080/api/auth/otp/reset-password', {
+            await axios.post('https://steadfast-rejoicing-production.up.railway.app/api/auth/otp/reset-password', {
                 email,
                 otp,
                 newPassword

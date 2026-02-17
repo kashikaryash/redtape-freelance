@@ -37,7 +37,7 @@ import {
   Inventory,
 } from '@mui/icons-material';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = 'https://steadfast-rejoicing-production.up.railway.app/api';
 
 const ShowAllProducts = () => {
   const [products, setProducts] = useState([]);
