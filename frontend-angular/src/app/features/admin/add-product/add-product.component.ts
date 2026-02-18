@@ -416,7 +416,53 @@ export class AddProductComponent implements OnInit {
     }
   }
 
-  // ... (analyzeImageForColor remains the same)
+  async analyzeImageForColor(file: File) {
+    try {
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      await new Promise(r => img.onload = r);
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      canvas.width = 100; canvas.height = 100;
+      ctx.drawImage(img, img.width / 4, img.height / 4, img.width / 2, img.height / 2, 0, 0, 100, 100);
+      const data = ctx.getImageData(0, 0, 100, 100).data;
+      let r = 0, g = 0, b = 0, c = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        const br = (data[i] + data[i + 1] + data[i + 2]) / 3;
+        if (br > 20 && br < 235) { r += data[i]; g += data[i + 1]; b += data[i + 2]; c++; }
+      }
+      if (c > 0) {
+        const hex = this.rgbToHex(Math.floor(r / c), Math.floor(g / c), Math.floor(b / c));
+        const group = this.colorGroups.at(0);
+        group.get('colorHex')?.setValue(hex);
+        group.get('color')?.setValue(this.findNearestColor(Math.floor(r / c), Math.floor(g / c), Math.floor(b / c)), { emitEvent: false });
+      }
+    } catch (e) { }
+  }
+
+  private rgbToHex(r: number, g: number, b: number) {
+    return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+  }
+
+  private findNearestColor(r: number, g: number, b: number) {
+    let min = Infinity, res = 'Custom';
+    for (const [name, hex] of Object.entries(COLOR_MAP)) {
+      const entryR = parseInt(hex.slice(1, 3), 16), entryG = parseInt(hex.slice(3, 5), 16), entryB = parseInt(hex.slice(5, 7), 16);
+      const d = Math.sqrt(Math.pow(r - entryR, 2) + Math.pow(g - entryG, 2) + Math.pow(b - entryB, 2));
+      if (d < min) { min = d; res = name.charAt(0).toUpperCase() + name.slice(1); }
+    }
+    return res;
+  }
+
+  removeImage(gi: number, ii: number) {
+    this.groupImages[gi][ii] = null;
+    this.groupPreviews[gi][ii] = null;
+  }
+
+  getPreview(gi: number, ii: number) {
+    return this.groupPreviews[gi]?.[ii] || null;
+  }
 
   async onSubmit() {
     if (this.productForm.invalid) {
