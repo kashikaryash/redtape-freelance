@@ -341,9 +341,21 @@ public class ProductService {
 
     @Transactional
     public Product addProductByModerator(ProductDto productDto, List<MultipartFile> files, Long userId) {
-        userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        Moderator moderator = moderatorRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Moderator record not found"));
+        // First verify user exists
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+
+        // Get or create moderator profile safely
+        Moderator moderator = moderatorRepository.findByUserId(userId).orElseGet(() -> {
+            // Auto-create missing moderator profile to prevent 500 errors
+            Moderator newMod = new Moderator();
+            newMod.setUser(user);
+            newMod.setIsActive(true);
+            newMod.setBrandName(user.getName() + "'s Brand"); // Default brand name
+            newMod.setAssignedBy(null); // Self-registered or system created
+            newMod.setIsContractSigned(false);
+            return moderatorRepository.save(newMod);
+        });
 
         if (!moderator.getCanEditProducts()) {
             throw new RuntimeException("Unauthorized: Moderator cannot add products.");

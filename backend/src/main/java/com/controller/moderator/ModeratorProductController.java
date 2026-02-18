@@ -45,19 +45,24 @@ public class ModeratorProductController {
 
     @PostMapping(consumes = { "multipart/form-data" })
     @org.springframework.transaction.annotation.Transactional
-    public ResponseEntity<com.payload.response.ProductResponse> createProduct(
+    public ResponseEntity<?> createProduct(
             @RequestPart("product") String productJson,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
-            @AuthenticationPrincipal UserDetailsImpl currentUser) throws IOException {
+            @AuthenticationPrincipal UserDetailsImpl currentUser) {
 
-        ProductDto productDto = objectMapper.readValue(productJson, ProductDto.class);
+        try {
+            ProductDto productDto = objectMapper.readValue(productJson, ProductDto.class);
+            Product createdProduct = productService.addProductByModerator(
+                    productDto,
+                    files,
+                    currentUser.getId());
 
-        Product createdProduct = productService.addProductByModerator(
-                productDto,
-                files,
-                currentUser.getId());
-
-        return ResponseEntity.ok(productMapper.toResponse(createdProduct));
+            return ResponseEntity.ok(productMapper.toResponse(createdProduct));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest()
+                    .body(new com.payload.response.MessageResponse("Error: " + e.getMessage()));
+        }
     }
 
     @PutMapping(value = "/{modelNo}", consumes = { "multipart/form-data" })
