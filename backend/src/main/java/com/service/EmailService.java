@@ -19,6 +19,9 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
+    @org.springframework.beans.factory.annotation.Value("${app.frontend.url}")
+    private String frontendUrl;
+
     @Async
     public void sendEmail(String to, String subject, String body) {
         try {
@@ -110,7 +113,9 @@ public class EmailService {
                 "<p style='color: #555; font-size: 16px; line-height: 1.5;'>Explore our latest collection and find the perfect pair that speaks to you.</p>"
                 +
                 "<div style='text-align: center; margin: 30px 0;'>" +
-                "<a href='http://localhost:4200/' style='display: inline-block; padding: 15px 30px; font-size: 16px; font-weight: bold; color: #ffffff; background-color: #e63946; text-decoration: none; border-radius: 5px;'>Start Shopping</a>"
+                "<div style='text-align: center; margin: 30px 0;'>" +
+                "<a href='" + frontendUrl
+                + "/' style='display: inline-block; padding: 15px 30px; font-size: 16px; font-weight: bold; color: #ffffff; background-color: #e63946; text-decoration: none; border-radius: 5px;'>Start Shopping</a>"
                 +
                 "</div>" +
                 getFooter();
@@ -131,7 +136,9 @@ public class EmailService {
                 "<p style='color: #555; font-size: 16px; line-height: 1.5;'>Please login and change your password immediately.</p>"
                 +
                 "<div style='text-align: center; margin: 30px 0;'>" +
-                "<a href='http://localhost:4200/login' style='display: inline-block; padding: 15px 30px; font-size: 16px; font-weight: bold; color: #ffffff; background-color: #e63946; text-decoration: none; border-radius: 5px;'>Login Now</a>"
+                "<div style='text-align: center; margin: 30px 0;'>" +
+                "<a href='" + frontendUrl
+                + "/login' style='display: inline-block; padding: 15px 30px; font-size: 16px; font-weight: bold; color: #ffffff; background-color: #e63946; text-decoration: none; border-radius: 5px;'>Login Now</a>"
                 +
                 "</div>" +
                 getFooter();
@@ -148,7 +155,9 @@ public class EmailService {
                 "<p style='color: #555; font-size: 16px; line-height: 1.5;'>You will receive another email once your order has been shipped.</p>"
                 +
                 "<div style='text-align: center; margin: 30px 0;'>" +
-                "<a href='http://localhost:5173/orders' style='display: inline-block; padding: 15px 30px; font-size: 16px; font-weight: bold; color: #ffffff; background-color: #e63946; text-decoration: none; border-radius: 5px;'>View My Order</a>"
+                "<div style='text-align: center; margin: 30px 0;'>" +
+                "<a href='" + frontendUrl
+                + "/orders' style='display: inline-block; padding: 15px 30px; font-size: 16px; font-weight: bold; color: #ffffff; background-color: #e63946; text-decoration: none; border-radius: 5px;'>View My Order</a>"
                 +
                 "</div>" +
                 getFooter();
@@ -190,7 +199,9 @@ public class EmailService {
                 "<p style='color: #555; font-size: 16px; line-height: 1.5; text-align: center;'>" + statusMessage
                 + "</p>" +
                 "<div style='text-align: center; margin: 30px 0;'>" +
-                "<a href='http://localhost:5173/my-orders' style='display: inline-block; padding: 15px 30px; font-size: 16px; font-weight: bold; color: #ffffff; background-color: #e63946; text-decoration: none; border-radius: 5px;'>Track Your Order</a>"
+                "<div style='text-align: center; margin: 30px 0;'>" +
+                "<a href='" + frontendUrl
+                + "/my-orders' style='display: inline-block; padding: 15px 30px; font-size: 16px; font-weight: bold; color: #ffffff; background-color: #e63946; text-decoration: none; border-radius: 5px;'>Track Your Order</a>"
                 +
                 "</div>" +
                 getFooter();
@@ -255,7 +266,8 @@ public class EmailService {
                 "</div>" +
                 "</div>" +
                 "<div style='text-align: center; margin: 30px 0;'>" +
-                "<a href='http://localhost:5173/my-orders' style='display: inline-block; padding: 15px 30px; font-size: 16px; font-weight: bold; color: #ffffff; background-color: #e63946; text-decoration: none; border-radius: 5px;'>Track Your Order</a>"
+                "<a href='" + frontendUrl
+                + "/my-orders' style='display: inline-block; padding: 15px 30px; font-size: 16px; font-weight: bold; color: #ffffff; background-color: #e63946; text-decoration: none; border-radius: 5px;'>Track Your Order</a>"
                 +
                 "</div>" +
                 getFooter();

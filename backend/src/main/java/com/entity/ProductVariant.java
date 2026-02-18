@@ -60,27 +60,27 @@ public class ProductVariant {
     // needed
     // For now, simplicity: use fields. Sync logic will be in Service.
 
-    private String getAttributeValue(String attributeName) {
-        if (attributeValues == null)
-            return null;
-        return attributeValues.stream()
-                .filter(av -> av != null && av.getAttributeValue() != null &&
-                        av.getAttributeValue().getAttribute() != null &&
-                        av.getAttributeValue().getAttribute().getName().equalsIgnoreCase(attributeName))
-                .map(av -> av.getAttributeValue().getValue())
-                .findFirst()
-                .orElse(null);
-    }
+    // private String getAttributeValue(String attributeName) {
+    // if (attributeValues == null)
+    // return null;
+    // return attributeValues.stream()
+    // .filter(av -> av != null && av.getAttributeValue() != null &&
+    // av.getAttributeValue().getAttribute() != null &&
+    // av.getAttributeValue().getAttribute().getName().equalsIgnoreCase(attributeName))
+    // .map(av -> av.getAttributeValue().getValue())
+    // .findFirst()
+    // .orElse(null);
+    // }
 
-    private String getAttributeMetadata(String attributeName) {
-        if (attributeValues == null)
-            return null;
-        return attributeValues.stream()
-                .filter(av -> av != null && av.getAttributeValue() != null &&
-                        av.getAttributeValue().getAttribute() != null &&
-                        av.getAttributeValue().getAttribute().getName().equalsIgnoreCase(attributeName))
-                .map(av -> av.getAttributeValue().getMetadata())
-                .findFirst()
-                .orElse(null);
-    }
+    // private String getAttributeMetadata(String attributeName) {
+    // if (attributeValues == null)
+    // return null;
+    // return attributeValues.stream()
+    // .filter(av -> av != null && av.getAttributeValue() != null &&
+    // av.getAttributeValue().getAttribute() != null &&
+    // av.getAttributeValue().getAttribute().getName().equalsIgnoreCase(attributeName))
+    // .map(av -> av.getAttributeValue().getMetadata())
+    // .findFirst()
+    // .orElse(null);
+    // }
 }
