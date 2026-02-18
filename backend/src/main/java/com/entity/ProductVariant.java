@@ -41,51 +41,24 @@ public class ProductVariant {
     private Double salePrice;
     private java.time.LocalDateTime saleEndTime;
 
-    // --- Legacy Fields (for safety/migration) ---
-    @Column(name = "color", insertable = false, updatable = false)
-    @JsonIgnore
-    private String legacyColor;
+    // --- Legacy Fields (re-enabled for DB compatibility) ---
+    @Column(name = "color")
+    private String color;
 
-    @Column(name = "size", insertable = false, updatable = false)
-    @JsonIgnore
-    private String legacySize;
+    @Column(name = "size")
+    private String size;
 
-    @Column(name = "color_hex", insertable = false, updatable = false)
-    @JsonIgnore
-    private String legacyColorHex;
+    @Column(name = "color_hex")
+    private String colorHex;
 
     @OneToMany(mappedBy = "variant", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<ProductImage> images = new ArrayList<>();
 
     // --- Backward Compatibility Helpers ---
-
-    public String getColor() {
-        String val = getAttributeValue("Color");
-        return (val != null) ? val : legacyColor;
-    }
-
-    public void setColor(String color) {
-        // Helper for legacy code
-    }
-
-    public String getColorHex() {
-        String val = getAttributeMetadata("Color");
-        return (val != null) ? val : legacyColorHex;
-    }
-
-    public void setColorHex(String hex) {
-        // Helper signature
-    }
-
-    public String getSize() {
-        String val = getAttributeValue("Size");
-        return (val != null) ? val : legacySize;
-    }
-
-    public void setSize(String size) {
-        // Helper signature
-    }
+    // Getters now use the field directly, but we can keep logic to fallback if
+    // needed
+    // For now, simplicity: use fields. Sync logic will be in Service.
 
     private String getAttributeValue(String attributeName) {
         if (attributeValues == null)

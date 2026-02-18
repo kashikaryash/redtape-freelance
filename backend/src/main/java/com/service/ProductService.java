@@ -285,9 +285,9 @@ public class ProductService {
     }
 
     private void mapVariantRequest(ProductVariantRequest vr, ProductVariant variant) {
-        // variant.setColor(vr.getColor()); // Handled by service
-        // variant.setColorHex(vr.getColorHex());
-        // variant.setSize(vr.getSize());
+        variant.setColor(vr.getColor());
+        variant.setColorHex(vr.getColorHex());
+        variant.setSize(vr.getSize());
         variant.setPrice(vr.getPrice());
         variant.setQuantity(vr.getQuantity());
         variant.setSku(vr.getSku());
