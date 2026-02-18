@@ -11,7 +11,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findByCategory(Category category);
 
-    @org.springframework.data.jpa.repository.Query("SELECT p FROM Product p WHERE p.moderator.user.id = :userId")
+    @org.springframework.data.jpa.repository.Query("SELECT p FROM Product p JOIN p.moderator m JOIN m.user u WHERE u.id = :userId")
     List<Product> findByModerator_UserId(@org.springframework.data.repository.query.Param("userId") Long userId);
 
     List<Product> findByNameContainingIgnoreCase(String name);
