@@ -230,26 +230,32 @@ public class ProductService {
     }
 
     private void addFeatured(List<FeaturedProductResponse> list, Category category) {
-        Product p = productRepository.findTopByCategoryOrderByModelNoDesc(category);
-        if (p != null) {
-            FeaturedProductResponse dto = new FeaturedProductResponse();
-            dto.setModelNo(p.getModelNo());
-            dto.setName(p.getName());
-            dto.setCategory(p.getCategory().name());
+        try {
+            Product p = productRepository.findTopByCategoryOrderByModelNoDesc(category);
+            if (p != null && p.getCategory() != null) {
+                FeaturedProductResponse dto = new FeaturedProductResponse();
+                dto.setModelNo(p.getModelNo());
+                dto.setName(p.getName());
+                dto.setCategory(p.getCategory().name());
 
-            if (!p.getVariants().isEmpty()) {
-                ProductVariant v = p.getVariants().get(0);
-                dto.setPrice(v.getPrice());
-                if (!v.getImages().isEmpty()) {
-                    String url = v.getImages().get(0).getImageUrl();
-                    if (url != null && url.startsWith("/")) {
-                        url = "https://zestful-recreation-production.up.railway.app" + url;
+                if (!p.getVariants().isEmpty()) {
+                    ProductVariant v = p.getVariants().get(0);
+                    dto.setPrice(v.getPrice());
+                    if (!v.getImages().isEmpty()) {
+                        String url = v.getImages().get(0).getImageUrl();
+                        if (url != null && url.startsWith("/")) {
+                            // Use the correct backend URL for production images
+                            url = "https://loyal-benevolence-production.up.railway.app" + url;
+                        }
+                        dto.setImageUrl(url);
                     }
-                    dto.setImageUrl(url);
                 }
-            }
 
-            list.add(dto);
+                list.add(dto);
+            }
+        } catch (Exception e) {
+            // Log error but continue adding other categories to prevent 500 API failure
+            System.err.println("Error adding featured product for category " + category + ": " + e.getMessage());
         }
     }
 
@@ -457,7 +463,12 @@ public class ProductService {
                         img.setImageUrl(storedPath);
                         img.setImageType(file.getContentType());
                     } else {
-                        img.setImageUrl(imageUrl);
+                        // Keep existing URL if valid, or set placeholder
+                        if (imageUrl != null && !imageUrl.isEmpty()) {
+                            img.setImageUrl(imageUrl);
+                        } else {
+                            img.setImageUrl("/assets/imagenotavailableplaceholder.png");
+                        }
                     }
                     variant.getImages().add(img);
                 }
