@@ -30,6 +30,10 @@ public class OrderTracking {
     @Column(nullable = false)
     private String state;
 
+    // Legacy field required by DB
+    @Column(name = "location")
+    private String location;
+
     @Column(length = 500)
     private String description;
 
@@ -42,6 +46,7 @@ public class OrderTracking {
         this.city = city;
         this.state = state;
         this.description = description;
+        this.location = city + ", " + state; // Auto-populate legacy field
         this.timestamp = LocalDateTime.now();
     }
 }
