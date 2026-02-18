@@ -37,10 +37,17 @@ public class ModeratorProductController {
     private ObjectMapper objectMapper;
 
     @GetMapping("/my")
-    public ResponseEntity<List<com.payload.response.ProductResponse>> getMyProducts(
+    public ResponseEntity<?> getMyProducts(
             @AuthenticationPrincipal UserDetailsImpl currentUser) {
-        List<Product> products = productService.getProductsByModerator(currentUser.getId());
-        return ResponseEntity.ok(products.stream().map(productMapper::toResponse).toList());
+        try {
+            List<Product> products = productService.getProductsByModerator(currentUser.getId());
+            return ResponseEntity.ok(products.stream().map(productMapper::toResponse).toList());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError()
+                    .body(new com.payload.response.MessageResponse(
+                            "Error: " + e.getClass().getSimpleName() + ": " + e.getMessage()));
+        }
     }
 
     @PostMapping(consumes = { "multipart/form-data" })
