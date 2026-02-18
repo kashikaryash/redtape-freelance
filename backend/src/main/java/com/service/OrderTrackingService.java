@@ -20,12 +20,13 @@ public class OrderTrackingService {
     @Autowired
     private OrderRepository orderRepository;
 
-    @Transactional
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public OrderTracking addTrackingRecord(Long orderId, TrackingStatus status, String city, String state,
             String description) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
+        System.out.println("DEBUG: Creating tracking record with location: " + city + ", " + state);
         OrderTracking tracking = new OrderTracking(order, status, city, state, description);
         return orderTrackingRepository.save(tracking);
     }

@@ -144,7 +144,8 @@ public class OrderService {
             orderTrackingService.addTrackingRecord(savedOrder.getId(), TrackingStatus.ORDER_CONFIRMED,
                     city, state, "Order has been confirmed and is being prepared.");
         } catch (Exception e) {
-            System.err.println("Failed to add initial tracking record: " + e.getMessage());
+            // Defensive coding: Non-fatal error should not rollback order
+            System.err.println("Non-fatal error: Failed to add initial tracking: " + e.getMessage());
         }
 
         return OrderMapper.toResponseDTO(savedOrder);

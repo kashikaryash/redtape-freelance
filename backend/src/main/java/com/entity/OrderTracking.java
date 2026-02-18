@@ -46,7 +46,10 @@ public class OrderTracking {
         this.city = city;
         this.state = state;
         this.description = description;
-        this.location = city + ", " + state; // Auto-populate legacy field
+
+        // Defensive coding: Ensure location is never null
+        this.location = (city != null ? city : "") + ", " + (state != null ? state : "");
+
         this.timestamp = LocalDateTime.now();
     }
 }
