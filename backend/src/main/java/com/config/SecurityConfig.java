@@ -178,7 +178,7 @@ public class SecurityConfig {
                 return http.build();
         }
 
-        @org.springframework.beans.factory.annotation.Value("${app.cors.allowed-origins:http://localhost:4200,http://localhost:3000}")
+        @org.springframework.beans.factory.annotation.Value("${app.cors.allowed-origins:http://localhost:4200,http://localhost:3000,https://accomplished-radiance-production.up.railway.app}")
         private String allowedOrigins;
 
         /**
