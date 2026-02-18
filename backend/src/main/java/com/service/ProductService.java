@@ -85,6 +85,15 @@ public class ProductService {
             return new ArrayList<>();
         }
         try {
+            // If the user is an EMPLOYEE, use their parentId (the moderator's userId)
+            User user = userRepository.findById(userId).orElse(null);
+            if (user != null && user.getRole() == com.entity.Role.EMPLOYEE) {
+                Long parentId = user.getParentId();
+                if (parentId == null) {
+                    return new ArrayList<>();
+                }
+                return productRepository.findByModerator_UserId(parentId);
+            }
             return productRepository.findByModerator_UserId(userId);
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(ProductService.class)
@@ -354,13 +363,26 @@ public class ProductService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
 
+        // If EMPLOYEE, resolve to their parent moderator's userId
+        if (user.getRole() == com.entity.Role.EMPLOYEE) {
+            if (user.getParentId() == null) {
+                throw new RuntimeException("Employee has no parent moderator assigned.");
+            }
+            Long parentId = user.getParentId();
+            user = userRepository.findById(parentId)
+                    .orElseThrow(() -> new RuntimeException("Parent moderator user not found: " + parentId));
+        }
+
+        final User moderatorUser = user;
+        final Long finalModeratorUserId = moderatorUser.getId();
+
         // Get or create moderator profile safely
-        Moderator moderator = moderatorRepository.findByUserId(userId).orElseGet(() -> {
+        Moderator moderator = moderatorRepository.findByUserId(finalModeratorUserId).orElseGet(() -> {
             // Auto-create missing moderator profile to prevent 500 errors
             Moderator newMod = new Moderator();
-            newMod.setUser(user);
+            newMod.setUser(moderatorUser);
             newMod.setIsActive(true);
-            newMod.setBrandName(user.getName() + "'s Brand"); // Default brand name
+            newMod.setBrandName(moderatorUser.getName() + "'s Brand"); // Default brand name
             newMod.setAssignedBy(null); // Self-registered or system created
             newMod.setIsContractSigned(false);
 
@@ -388,7 +410,15 @@ public class ProductService {
             Long userId) {
         Product product = getProductByModelNo(modelNo);
 
-        if (product.getModerator() == null || !product.getModerator().getUser().getId().equals(userId)) {
+        // Resolve effective moderator userId (employees use their parentId)
+        User user = userRepository.findById(userId).orElse(null);
+        Long effectiveModeratorUserId = userId;
+        if (user != null && user.getRole() == com.entity.Role.EMPLOYEE && user.getParentId() != null) {
+            effectiveModeratorUserId = user.getParentId();
+        }
+
+        if (product.getModerator() == null
+                || !product.getModerator().getUser().getId().equals(effectiveModeratorUserId)) {
             throw new RuntimeException("Unauthorized: You do not own this product.");
         }
 
