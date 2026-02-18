@@ -354,6 +354,13 @@ public class ProductService {
             newMod.setBrandName(user.getName() + "'s Brand"); // Default brand name
             newMod.setAssignedBy(null); // Self-registered or system created
             newMod.setIsContractSigned(false);
+
+            // Auto-grant permissions for new moderators
+            newMod.setCanEditProducts(true);
+            newMod.setCanManageOrders(true);
+            newMod.setCanDeleteReviews(true);
+            newMod.setIsBrandActive(true);
+
             return moderatorRepository.save(newMod);
         });
 
