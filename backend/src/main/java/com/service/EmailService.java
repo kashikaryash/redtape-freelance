@@ -8,16 +8,21 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import java.util.Objects;
 
 @Service
+@Slf4j
 public class EmailService {
 
     @Autowired
     private JavaMailSender mailSender;
 
+    @Async
     public void sendEmail(String to, String subject, String body) {
         try {
+            log.info("Sending email to {} with subject: {}", to, subject);
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
@@ -26,14 +31,18 @@ public class EmailService {
             helper.setText(Objects.requireNonNull(body, "Email body is required"), true);
 
             mailSender.send(message);
+            log.info("Email sent successfully to {}", to);
         } catch (MessagingException e) {
+            log.error("Failed to send email to {}", to, e);
             throw new RuntimeException("Failed to send email", e);
         }
     }
 
+    @Async
     public void sendEmailWithAttachment(String to, String subject, String body, byte[] attachmentData,
             String attachmentName) {
         try {
+            log.info("Sending email with attachment to {} with subject: {}", to, subject);
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
@@ -47,7 +56,9 @@ public class EmailService {
             }
 
             mailSender.send(message);
+            log.info("Email with attachment sent successfully to {}", to);
         } catch (MessagingException e) {
+            log.error("Failed to send email with attachment to {}", to, e);
             throw new RuntimeException("Failed to send email with attachment", e);
         }
     }
@@ -100,6 +111,27 @@ public class EmailService {
                 +
                 "<div style='text-align: center; margin: 30px 0;'>" +
                 "<a href='http://localhost:4200/' style='display: inline-block; padding: 15px 30px; font-size: 16px; font-weight: bold; color: #ffffff; background-color: #e63946; text-decoration: none; border-radius: 5px;'>Start Shopping</a>"
+                +
+                "</div>" +
+                getFooter();
+        sendEmail(to, subject, body);
+    }
+
+    public void sendEmployeeWelcomeEmail(String to, String name, String password, String moderatorName) {
+        String subject = "You've been added to the SnapCart Team!";
+        String body = getHeader() +
+                "<h2 style='color: #333; text-align: center;'>Welcome to the Team, " + name + "!</h2>" +
+                "<p style='color: #555; font-size: 16px; line-height: 1.5;'>You have been added as an employee by <b>"
+                + moderatorName + "</b>.</p>" +
+                "<p style='color: #555; font-size: 16px; line-height: 1.5;'>Here are your login credentials:</p>" +
+                "<div style='background-color: #f1f1f1; padding: 15px; border-radius: 5px; margin: 20px 0;'>" +
+                "<p style='margin: 5px 0;'><b>Email:</b> " + to + "</p>" +
+                "<p style='margin: 5px 0;'><b>Password:</b> " + password + "</p>" +
+                "</div>" +
+                "<p style='color: #555; font-size: 16px; line-height: 1.5;'>Please login and change your password immediately.</p>"
+                +
+                "<div style='text-align: center; margin: 30px 0;'>" +
+                "<a href='http://localhost:4200/login' style='display: inline-block; padding: 15px 30px; font-size: 16px; font-weight: bold; color: #ffffff; background-color: #e63946; text-decoration: none; border-radius: 5px;'>Login Now</a>"
                 +
                 "</div>" +
                 getFooter();

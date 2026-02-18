@@ -8,26 +8,22 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { AuthService } from '../../../core/services/auth.service';
-import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
-    selector: 'app-super-admin-layout',
-    standalone: true,
-    imports: [
-        CommonModule, RouterModule, MatToolbarModule, MatButtonModule,
-        MatIconModule, MatMenuModule, MatSidenavModule, MatListModule
-    ],
-    template: `
-    <div class="super-admin-layout" [class.dark-mode]="isDarkMode()">
+  selector: 'app-super-admin-layout',
+  standalone: true,
+  imports: [
+    CommonModule, RouterModule, MatToolbarModule, MatButtonModule,
+    MatIconModule, MatMenuModule, MatSidenavModule, MatListModule
+  ],
+  template: `
+    <div class="super-admin-layout">
       <mat-toolbar class="top-navbar">
         <button mat-icon-button (click)="sidenav.toggle()">
           <mat-icon>menu</mat-icon>
         </button>
         <span class="logo">SUPER ADMIN PANEL</span>
         <span class="spacer"></span>
-        <button mat-icon-button (click)="toggleTheme()">
-          <mat-icon>{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
-        </button>
         <button mat-button [matMenuTriggerFor]="userMenu">
           <mat-icon>account_circle</mat-icon>
           {{ auth.user()?.name }}
@@ -70,7 +66,7 @@ import { ThemeService } from '../../../core/services/theme.service';
       </mat-menu>
     </div>
   `,
-    styles: [`
+  styles: [`
     .super-admin-layout { height: 100vh; display: flex; flex-direction: column; }
     .top-navbar { 
       background: var(--surface); 
@@ -88,11 +84,7 @@ import { ThemeService } from '../../../core/services/theme.service';
   `]
 })
 export class SuperAdminLayoutComponent {
-    auth = inject(AuthService);
-    theme = inject(ThemeService);
-    router = inject(Router);
-    isDarkMode = this.theme.isDarkMode;
-
-    toggleTheme() { this.theme.toggleTheme(); }
-    logout() { this.auth.logout(); this.router.navigate(['/login']); }
+  auth = inject(AuthService);
+  router = inject(Router);
+  logout() { this.auth.logout(); this.router.navigate(['/login']); }
 }

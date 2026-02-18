@@ -7,7 +7,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../../core/services/auth.service';
-import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-moderator-layout',
@@ -29,17 +28,19 @@ import { ThemeService } from '../../../core/services/theme.service';
           <mat-icon class="logo-icon">directions_run</mat-icon>
           <div class="logo-box">
              <span class="logo-text">SnapCart</span>
-             <span class="role-badge">MODERATOR</span>
+             <span class="role-badge">{{ auth.user()?.role === 'EMPLOYEE' ? 'EMPLOYEE' : 'MODERATOR' }}</span>
           </div>
         </div>
         
         <span class="spacer"></span>
         
         <div class="nav-right">
-          <button mat-icon-button (click)="toggleTheme()" matTooltip="Toggle theme" class="theme-toggle">
-            <mat-icon>{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
-          </button>
           
+          <a mat-button routerLink="/moderator/employees" class="nav-link" *ngIf="auth.user()?.role !== 'EMPLOYEE'">
+            <mat-icon>group</mat-icon>
+            Team
+          </a>
+
           <a mat-button routerLink="/" class="nav-link">
             <mat-icon>store</mat-icon>
             Store
@@ -114,13 +115,6 @@ import { ThemeService } from '../../../core/services/theme.service';
 export class ModeratorLayoutComponent {
   auth = inject(AuthService);
   router = inject(Router);
-  theme = inject(ThemeService);
-
-  isDarkMode = this.theme.isDarkMode;
-
-  toggleTheme() {
-    this.theme.toggleTheme();
-  }
 
   logout() {
     this.auth.logout();

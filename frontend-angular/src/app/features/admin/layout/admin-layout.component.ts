@@ -6,7 +6,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { AuthService } from '../../../core/services/auth.service';
-import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-admin-layout',
@@ -24,9 +23,6 @@ import { ThemeService } from '../../../core/services/theme.service';
         <span class="spacer"></span>
         
         <div class="nav-right">
-          <button mat-icon-button (click)="toggleTheme()" matTooltip="Toggle theme" class="theme-toggle">
-            <mat-icon>{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
-          </button>
           
           <a mat-button routerLink="/" class="nav-link">
             <mat-icon>store</mat-icon>
@@ -95,13 +91,6 @@ import { ThemeService } from '../../../core/services/theme.service';
 export class AdminLayoutComponent {
   auth = inject(AuthService);
   router = inject(Router);
-  theme = inject(ThemeService);
-
-  isDarkMode = this.theme.isDarkMode;
-
-  toggleTheme() {
-    this.theme.toggleTheme();
-  }
 
   logout() {
     this.auth.logout();

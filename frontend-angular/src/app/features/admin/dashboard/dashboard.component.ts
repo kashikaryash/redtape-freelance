@@ -5,7 +5,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { AdminService } from '../../../core/services/admin.service';
-import { ThemeService } from '../../../core/services/theme.service';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 
@@ -224,9 +223,6 @@ import { ChartConfiguration, ChartOptions } from 'chart.js';
 })
 export class DashboardComponent {
   private adminService = inject(AdminService);
-  private themeService = inject(ThemeService);
-
-  isDarkMode = this.themeService.isDarkMode;
 
   totalRevenue = signal(0);
   totalOrders = signal(0);

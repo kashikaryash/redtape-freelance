@@ -17,9 +17,19 @@ public class DeliveryController {
 
     @PostMapping("/check")
     public ResponseEntity<?> checkDelivery(@RequestBody Map<String, Object> request) {
-        Long productId = Long.valueOf(request.get("productId").toString());
-        String pincode = request.get("destinationPincode").toString();
+        Object productIdObj = request.get("productId");
+        Object pincodeObj = request.get("destinationPincode");
 
-        return ResponseEntity.ok(deliveryService.checkDelivery(productId, pincode));
+        if (productIdObj == null || pincodeObj == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "productId and destinationPincode are required"));
+        }
+
+        try {
+            Long productId = Long.valueOf(productIdObj.toString());
+            String pincode = pincodeObj.toString();
+            return ResponseEntity.ok(deliveryService.checkDelivery(productId, pincode));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Invalid productId or pincode format"));
+        }
     }
 }

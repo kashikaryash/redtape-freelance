@@ -53,4 +53,11 @@ public class ModeratorResponse {
     private String panNumber;
     private String kycStatus;
     private Boolean isBrandActive;
+    private String warehouseCity;
+    private String warehouseState;
+    private String warehousePincode;
+
+    private Boolean isContractSigned;
+    private LocalDateTime contractSignedAt;
+    private String signatureUrl;
 }

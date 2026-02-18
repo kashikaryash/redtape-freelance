@@ -1,5 +1,5 @@
 export const environment = {
     production: false,
-    apiUrl: 'https://steadfast-rejoicing-production.up.railway.app/api',
+    apiUrl: 'http://localhost:8080/api',
     devAutoLoginEmail: 'yash983496@gmail.com'
 };

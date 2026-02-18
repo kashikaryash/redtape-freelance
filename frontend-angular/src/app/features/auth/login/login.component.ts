@@ -62,7 +62,7 @@ export class LoginComponent {
       this.router.navigate(['/super-admin/dashboard']);
     } else if (roles.includes('ROLE_ADMIN')) {
       this.router.navigate(['/admin/dashboard']);
-    } else if (roles.includes('ROLE_MODERATOR')) {
+    } else if (roles.includes('ROLE_MODERATOR') || roles.includes('ROLE_EMPLOYEE')) {
       this.router.navigate(['/moderatorHome']);
     } else {
       this.router.navigate(['/']);

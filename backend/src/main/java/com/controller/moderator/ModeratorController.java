@@ -2,7 +2,9 @@ package com.controller.moderator;
 
 import com.entity.Category;
 import com.payload.request.ModeratorRequest;
+import com.payload.request.SignupRequest;
 import com.payload.response.ModeratorResponse;
+import com.payload.response.EmployeeResponse;
 import com.service.ModeratorService;
 import com.service.UserDetailsImpl;
 import jakarta.validation.Valid;
@@ -166,6 +168,19 @@ public class ModeratorController {
     }
 
     /**
+     * Update current moderator's own profile.
+     */
+    @PutMapping("/moderators/me")
+    @PreAuthorize("hasRole('MODERATOR')")
+    public ResponseEntity<ModeratorResponse> updateMyProfile(
+            @RequestBody ModeratorRequest request,
+            @AuthenticationPrincipal UserDetailsImpl currentUser) {
+
+        ModeratorResponse response = moderatorService.updateModeratorProfile(currentUser.getId(), request);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Check if current moderator has a specific permission.
      * 
      * @param permission  Permission to check (DELETE_REVIEWS, BAN_USERS,
@@ -198,5 +213,27 @@ public class ModeratorController {
 
         boolean canManage = moderatorService.canManageCategory(currentUser.getId(), category);
         return ResponseEntity.ok(Map.of("canManage", canManage));
+    }
+
+    /**
+     * Get all employees for the current moderator.
+     */
+    @GetMapping("/moderators/me/employees")
+    @PreAuthorize("hasRole('MODERATOR')")
+    public ResponseEntity<List<EmployeeResponse>> getMyEmployees(
+            @AuthenticationPrincipal UserDetailsImpl currentUser) {
+        return ResponseEntity.ok(moderatorService.getEmployeesByModerator(currentUser.getId()));
+    }
+
+    /**
+     * Create a new employee for the current moderator.
+     */
+    @PostMapping("/moderators/me/employees")
+    @PreAuthorize("hasRole('MODERATOR')")
+    public ResponseEntity<EmployeeResponse> createEmployee(
+            @Valid @RequestBody SignupRequest request,
+            @AuthenticationPrincipal UserDetailsImpl currentUser) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(moderatorService.createEmployee(request, currentUser.getId()));
     }
 }

@@ -29,26 +29,22 @@ public class DeliveryService {
 
         Pincode dest = pincodeRepository.findByPincode(destinationPincode).orElse(null);
 
-        if (dest == null) {
-            response.put("serviceable", false);
-            response.put("message", "Delivery not available to this location");
-            return response;
-        }
-
-        Moderator moderator = product.getModerator();
-        String warehouseCity = (moderator != null && moderator.getWarehouseCity() != null)
-                ? moderator.getWarehouseCity()
-                : "Mumbai";
-        String warehouseState = (moderator != null && moderator.getWarehouseState() != null)
-                ? moderator.getWarehouseState()
-                : "Maharashtra";
-
         int deliveryDays = 7; // Default
 
-        if (warehouseCity.equalsIgnoreCase(dest.getCity())) {
-            deliveryDays = 2;
-        } else if (warehouseState.equalsIgnoreCase(dest.getState())) {
-            deliveryDays = 4;
+        if (dest != null) {
+            Moderator moderator = product.getModerator();
+            String warehouseCity = (moderator != null && moderator.getWarehouseCity() != null)
+                    ? moderator.getWarehouseCity()
+                    : "Mumbai";
+            String warehouseState = (moderator != null && moderator.getWarehouseState() != null)
+                    ? moderator.getWarehouseState()
+                    : "Maharashtra";
+
+            if (warehouseCity.equalsIgnoreCase(dest.getCity())) {
+                deliveryDays = 2;
+            } else if (warehouseState.equalsIgnoreCase(dest.getState())) {
+                deliveryDays = 4;
+            }
         }
 
         LocalDate estimatedDate = LocalDate.now().plusDays(deliveryDays);

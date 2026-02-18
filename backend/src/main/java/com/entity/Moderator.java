@@ -145,6 +145,17 @@ public class Moderator {
     @Column(nullable = false)
     private Boolean isBrandActive = false;
 
+    // ==================== CONTRACT DETAILS ====================
+
+    @Column(nullable = false)
+    private Boolean isContractSigned = false;
+
+    @Column
+    private LocalDateTime contractSignedAt;
+
+    @Column(length = 255)
+    private String signatureUrl;
+
     // ==================== WAREHOUSE DETAILS ====================
 
     @Column(length = 255)

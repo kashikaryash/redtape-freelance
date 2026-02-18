@@ -2,7 +2,6 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { ThemeService } from '../../../core/services/theme.service';
 import { CartService } from '../../../core/services/cart.service';
 import { WishlistService } from '../../../core/services/wishlist.service';
 
@@ -40,24 +39,18 @@ import { AnimatedCartCounterComponent } from '../animated-cart-counter/animated-
 })
 export class NavbarComponent {
     private auth = inject(AuthService);
-    private theme = inject(ThemeService);
     private wishlist = inject(WishlistService);
     private router = inject(Router);
 
     // Expose to template
     user = this.auth.user; // Assuming user is available in AuthService
     primaryRole = this.auth.primaryRole;
-    isDarkMode = this.theme.isDarkMode;
     wishlistCount = this.wishlist.wishlistCount;
 
     hoveredCategory = signal<string | null>(null);
 
     setHovered(category: string | null) {
         this.hoveredCategory.set(category);
-    }
-
-    toggleTheme() {
-        this.theme.toggleTheme();
     }
 
     // Mobile Menu Logic

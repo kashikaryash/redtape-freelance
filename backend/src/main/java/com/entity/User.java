@@ -33,8 +33,11 @@ public class User {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 10)
+    @Column(length = 15)
     private Role role;
+
+    @Column(name = "parent_id")
+    private Long parentId;
 
     // Profile picture stored as binary
     @Lob

@@ -5,10 +5,13 @@ import com.entity.Moderator;
 import com.entity.Role;
 import com.entity.User;
 import com.payload.request.ModeratorRequest;
+import com.payload.request.SignupRequest;
 import com.payload.response.ModeratorResponse;
+import com.payload.response.EmployeeResponse;
 import com.repository.ModeratorRepository;
 import com.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +33,12 @@ public class ModeratorService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder encoder;
+
+    @Autowired
+    private EmailService emailService;
 
     /**
      * Assign moderator role and permissions to a user.
@@ -137,6 +146,40 @@ public class ModeratorService {
             moderator.setIfscCode(request.getIfscCode());
         if (request.getPanNumber() != null)
             moderator.setPanNumber(request.getPanNumber());
+
+        if (request.getWarehouseCity() != null)
+            moderator.setWarehouseCity(request.getWarehouseCity());
+        if (request.getWarehouseState() != null)
+            moderator.setWarehouseState(request.getWarehouseState());
+        if (request.getWarehousePincode() != null)
+            moderator.setWarehousePincode(request.getWarehousePincode());
+
+        if (request.getSignatureUrl() != null)
+            moderator.setSignatureUrl(request.getSignatureUrl());
+
+        if (request.getIsContractSigned() != null && request.getIsContractSigned()) {
+            moderator.setIsContractSigned(true);
+            if (moderator.getContractSignedAt() == null) {
+                moderator.setContractSignedAt(java.time.LocalDateTime.now());
+            }
+        }
+
+        if (request.getWarehouseCity() != null)
+            moderator.setWarehouseCity(request.getWarehouseCity());
+        if (request.getWarehouseState() != null)
+            moderator.setWarehouseState(request.getWarehouseState());
+        if (request.getWarehousePincode() != null)
+            moderator.setWarehousePincode(request.getWarehousePincode());
+
+        if (request.getSignatureUrl() != null)
+            moderator.setSignatureUrl(request.getSignatureUrl());
+
+        if (request.getIsContractSigned() != null && request.getIsContractSigned()) {
+            moderator.setIsContractSigned(true);
+            if (moderator.getContractSignedAt() == null) {
+                moderator.setContractSignedAt(java.time.LocalDateTime.now());
+            }
+        }
 
         // Any profile update drops brand back to inactive or keeps pending until
         // re-approved?
@@ -289,6 +332,57 @@ public class ModeratorService {
     }
 
     /**
+     * Create a new employee for a moderator.
+     */
+    @Transactional
+    public EmployeeResponse createEmployee(SignupRequest request, Long moderatorId) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Error: Email is already in use!");
+        }
+
+        User employee = new User();
+        employee.setName(request.getName());
+        employee.setEmail(request.getEmail());
+        employee.setPassword(encoder.encode(request.getPassword()));
+        employee.setMobile(request.getMobile());
+        employee.setGender(request.getGender());
+        employee.setRole(Role.EMPLOYEE);
+        employee.setParentId(moderatorId);
+
+        User saved = userRepository.save(employee);
+
+        // Fetch moderator name
+        String moderatorName = userRepository.findById(moderatorId)
+                .map(User::getName)
+                .orElse("Your Manager");
+
+        emailService.sendEmployeeWelcomeEmail(saved.getEmail(), saved.getName(), request.getPassword(), moderatorName);
+
+        return toEmployeeResponse(saved);
+    }
+
+    /**
+     * Get all employees for a specific moderator.
+     */
+    public List<EmployeeResponse> getEmployeesByModerator(Long moderatorId) {
+        return userRepository.findByParentId(moderatorId)
+                .stream()
+                .map(this::toEmployeeResponse)
+                .collect(Collectors.toList());
+    }
+
+    private EmployeeResponse toEmployeeResponse(User user) {
+        return new EmployeeResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getMobile(),
+                user.getGender(),
+                user.getRole(),
+                user.getParentId());
+    }
+
+    /**
      * Convert Moderator entity to response DTO.
      */
     private ModeratorResponse toResponse(Moderator moderator) {
@@ -316,6 +410,12 @@ public class ModeratorService {
                 .panNumber(moderator.getPanNumber())
                 .kycStatus(moderator.getKycStatus())
                 .isBrandActive(moderator.getIsBrandActive())
+                .warehouseCity(moderator.getWarehouseCity())
+                .warehouseState(moderator.getWarehouseState())
+                .warehousePincode(moderator.getWarehousePincode())
+                .isContractSigned(moderator.getIsContractSigned())
+                .contractSignedAt(moderator.getContractSignedAt())
+                .signatureUrl(moderator.getSignatureUrl())
                 .build();
     }
 }

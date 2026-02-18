@@ -80,15 +80,20 @@ public class CartService {
         // If color/size defaults are needed, handle here. For now assume strict match.
         // If color is missing, try to find *any* variant? No, strict.
 
-        Optional<ProductVariant> variantOpt = productVariantRepository.findByProductModelNoAndColorAndSize(modelNo,
-                color, size);
+        java.util.List<ProductVariant> variants = productVariantRepository.findByProductModelNo(modelNo);
+        Optional<ProductVariant> variantOpt = variants.stream()
+                .filter(v -> java.util.Objects.equals(v.getColor(), color)
+                        && java.util.Objects.equals(v.getSize(), size))
+                .findFirst();
 
         if (variantOpt.isEmpty()) {
-            // Fallback: if only one variant exists for the product, use it?
-            // Or try finding by just ID if size/color are null?
-            // For now, throw exception to enforce correct data.
-            throw new RuntimeException(
-                    "Product Variant not found for model: " + modelNo + " color: " + color + " size: " + size);
+            // Fallback: if only one variant exists and requested attributes were null/blank
+            if (variants.size() == 1 && (color == null || color.isBlank()) && (size == null || size.isBlank())) {
+                variantOpt = Optional.of(variants.get(0));
+            } else {
+                throw new RuntimeException(
+                        "Product Variant not found for model: " + modelNo + " color: " + color + " size: " + size);
+            }
         }
 
         ProductVariant variant = variantOpt.get();

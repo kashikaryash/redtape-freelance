@@ -43,6 +43,9 @@ public class ProductService {
     @Autowired
     private FileStorageUtil fileStorageUtil;
 
+    @Autowired
+    private ProductAttributeService attributeService;
+
     public List<Product> getRecommendations(Long userId) {
         if (userId == null) {
             return productRepository.findAll();
@@ -101,13 +104,14 @@ public class ProductService {
                         ProductVariant variant = new ProductVariant();
                         variant.setProduct(savedProduct);
                         mapVariantRequest(vr, variant);
-                        variant.setSize(size);
+                        attributeService.syncAttributes(variant, vr.getColor(), vr.getColorHex(), size);
                         productVariantRepository.save(variant);
                     }
                 } else {
                     ProductVariant variant = new ProductVariant();
                     variant.setProduct(savedProduct);
                     mapVariantRequest(vr, variant);
+                    attributeService.syncAttributes(variant, vr.getColor(), vr.getColorHex(), vr.getSize());
                     productVariantRepository.save(variant);
                 }
             }
@@ -132,13 +136,14 @@ public class ProductService {
                         ProductVariant variant = new ProductVariant();
                         variant.setProduct(product);
                         mapVariantRequest(vr, variant);
-                        variant.setSize(size);
+                        attributeService.syncAttributes(variant, vr.getColor(), vr.getColorHex(), size);
                         product.getVariants().add(variant);
                     }
                 } else {
                     ProductVariant variant = new ProductVariant();
                     variant.setProduct(product);
                     mapVariantRequest(vr, variant);
+                    attributeService.syncAttributes(variant, vr.getColor(), vr.getColorHex(), vr.getSize());
                     product.getVariants().add(variant);
                 }
             }
@@ -274,9 +279,9 @@ public class ProductService {
     }
 
     private void mapVariantRequest(ProductVariantRequest vr, ProductVariant variant) {
-        variant.setColor(vr.getColor());
-        variant.setColorHex(vr.getColorHex());
-        variant.setSize(vr.getSize());
+        // variant.setColor(vr.getColor()); // Handled by service
+        // variant.setColorHex(vr.getColorHex());
+        // variant.setSize(vr.getSize());
         variant.setPrice(vr.getPrice());
         variant.setQuantity(vr.getQuantity());
         variant.setSku(vr.getSku());
@@ -431,9 +436,7 @@ public class ProductService {
 
             variant.setPrice(vDto.getPrice());
             variant.setQuantity(vDto.getQuantity());
-            variant.setColor(vDto.getColor());
-            variant.setColorHex(vDto.getColorHex());
-            variant.setSize(vDto.getSize());
+            attributeService.syncAttributes(variant, vDto.getColor(), vDto.getColorHex(), vDto.getSize());
             variant.setSku(vDto.getSku());
             variant.setStyleCode(vDto.getStyleCode());
             variant.setSalePrice(vDto.getSalePrice());

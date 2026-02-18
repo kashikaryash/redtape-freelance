@@ -152,7 +152,10 @@ export const routes: Routes = [
                 path: 'edit-product/:modelNo',
                 loadComponent: () => import('./features/moderator/edit-product/edit-product.component').then(m => m.EditProductComponent)
             },
-
+            {
+                path: 'employees',
+                loadComponent: () => import('./features/moderator/employee-management/employee-management.component').then(m => m.EmployeeManagementComponent)
+            },
             {
                 path: 'profile',
                 loadComponent: () => import('./features/pages/profile-page/profile-page.component').then(m => m.ProfilePageComponent)

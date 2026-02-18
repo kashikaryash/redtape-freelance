@@ -15,13 +15,21 @@ public class ImageController {
     @Autowired
     private ProductImageRepository productImageRepository;
 
+    // @Autowired
+    // private com.service.UserService userService;
+
     /**
-     * Serve product image by ID (new path)
+     * Serve product image by ID
      */
     @GetMapping("/{imageId}")
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public ResponseEntity<byte[]> getImageById(@PathVariable Long imageId) {
-        return serveImage(imageId);
+        return productImageRepository.findById(imageId)
+                .map(img -> {
+                    // Public access to all images
+                    return serveImage(img.getId());
+                })
+                .orElseGet(() -> servePlaceholder());
     }
 
     /**

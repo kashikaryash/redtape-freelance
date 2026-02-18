@@ -157,7 +157,7 @@ import { Product, ProductVariant } from '../../../core/models/models';
                <div class="mt-2" *ngIf="deliveryResponse()">
                   <div *ngIf="deliveryResponse()?.serviceable; else notServiceable" class="text-success small fw-bold d-flex align-items-center gap-1">
                      <mat-icon style="font-size: 16px; width: 16px; height: 16px;">check_circle</mat-icon>
-                     Delivery by {{ deliveryResponse()?.estimatedDeliveryDate | date:'fullDate' }}
+                     <span>Delivery in {{ deliveryResponse()?.estimatedDays }} days (by {{ deliveryResponse()?.estimatedDeliveryDate | date:'fullDate' }})</span>
                   </div>
                   <ng-template #notServiceable>
                      <div class="text-danger small fw-bold d-flex align-items-center gap-1">
@@ -521,7 +521,7 @@ export class ProductDetailPageComponent implements OnInit {
          try {
             const product = this.product();
             if (!product) return;
-            const res = await this.productService.checkDelivery(product.id, this.pincode);
+            const res = await this.productService.checkDelivery(product.modelNo, this.pincode);
             this.deliveryResponse.set(res);
          } catch (err) {
             this.snackBar.open('Failed to check pincode', 'Close');

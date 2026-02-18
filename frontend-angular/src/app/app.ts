@@ -1,7 +1,6 @@
 import { Component, signal, inject } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { ThemeService } from './core/services/theme.service';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
 import { FooterComponent } from './shared/components/footer/footer.component';
 import { SmartPopupComponent } from './shared/components/smart-popup/smart-popup.component';
@@ -14,7 +13,6 @@ import { SmartPopupComponent } from './shared/components/smart-popup/smart-popup
 })
 export class App {
   protected readonly title = signal('frontend-angular');
-  private themeService = inject(ThemeService);
   private router = inject(Router);
 
   showLayout = signal(true);

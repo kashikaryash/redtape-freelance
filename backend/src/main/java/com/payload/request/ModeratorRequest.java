@@ -6,17 +6,23 @@ import lombok.Data;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Request DTO for creating or updating a Moderator.
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ModeratorRequest {
 
     /**
      * User ID to assign as moderator.
      * Required for creation, optional for updates.
      */
-    @NotNull(message = "User ID is required")
+    /**
+     * User ID to assign as moderator.
+     * Required for creation, optional for updates.
+     */
     private Long userId;
 
     /**
@@ -68,4 +74,11 @@ public class ModeratorRequest {
     private String panNumber;
     private String kycStatus; // For admin updates
     private Boolean isBrandActive; // For admin updates
+
+    private String warehouseCity;
+    private String warehouseState;
+    private String warehousePincode;
+
+    private String signatureUrl;
+    private Boolean isContractSigned;
 }

@@ -48,6 +48,9 @@ public class AdminProductController {
     @Autowired
     private com.mapper.ProductMapper productMapper;
 
+    @Autowired
+    private com.service.ProductAttributeService attributeService;
+
     @PostMapping(consumes = "multipart/form-data")
     @Transactional
     public ResponseEntity<com.payload.response.ProductResponse> createProduct(
@@ -169,7 +172,7 @@ public class AdminProductController {
             for (String size : sizeList) {
                 // Unique constraint check: model_no, color, size
                 Optional<ProductVariant> existingVariant = savedProduct.getVariants().stream()
-                        .filter(v -> v.getSize().equals(size) && v.getColor().equalsIgnoreCase(defaultColor))
+                        .filter(v -> Objects.equals(v.getSize(), size) && Objects.equals(v.getColor(), defaultColor))
                         .findFirst();
 
                 ProductVariant v;
@@ -178,12 +181,10 @@ public class AdminProductController {
                 } else {
                     v = new ProductVariant();
                     v.setProduct(savedProduct);
-                    v.setColor(defaultColor);
-                    v.setColorHex(defaultHex);
                     v.setStyleCode(styleCode);
                     v.setPrice(price);
                     v.setQuantity(quantity);
-                    v.setSize(size);
+                    attributeService.syncAttributes(v, defaultColor, defaultHex, size);
                     v = productVariantRepository.save(v);
                     savedProduct.getVariants().add(v);
                 }
@@ -200,23 +201,39 @@ public class AdminProductController {
         }
     }
 
+    private final java.nio.file.Path rootLocation = java.nio.file.Paths.get("uploads");
+
     private void handleImages(ProductVariant variant, MultipartFile... files) throws IOException {
+        // Ensure directory exists
+        if (!java.nio.file.Files.exists(rootLocation)) {
+            java.nio.file.Files.createDirectories(rootLocation);
+        }
+
         boolean hasUploaded = false;
         for (MultipartFile file : files) {
             if (file != null && !file.isEmpty()) {
                 ProductImage img = new ProductImage();
                 img.setVariant(variant);
-                img.setImageData(file.getBytes());
+
+                // Save to File System
+                String filename = java.util.UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+                java.nio.file.Path destinationFile = rootLocation.resolve(filename).normalize().toAbsolutePath();
+
+                // Security check: Verify file is within target directory
+                if (!destinationFile.getParent().equals(rootLocation.toAbsolutePath())) {
+                    throw new IOException("Cannot store file outside current directory.");
+                }
+
+                try (java.io.InputStream inputStream = file.getInputStream()) {
+                    java.nio.file.Files.copy(inputStream, destinationFile);
+                }
+
+                img.setImageData(null); // Do not store BLOB
                 img.setImageType(file.getContentType());
                 img.setPrimary(variant.getImages().isEmpty());
-                img.setImageUrl(""); // Placeholder initially
+                img.setImageUrl("/uploads/" + filename);
 
-                // Save image to get ID
-                img = productImageRepository.save(img);
-
-                // Update URL with generated ID
-                img.setImageUrl("/api/images/" + img.getId());
-                productImageRepository.save(img);
+                productImageRepository.save(img); // Save with URL
 
                 variant.getImages().add(img);
                 hasUploaded = true;
@@ -409,10 +426,8 @@ public class AdminProductController {
                     v.setPrice(price);
                 if (quantity != null)
                     v.setQuantity(quantity);
-                if (color != null)
-                    v.setColor(color);
-                if (colorHex != null)
-                    v.setColorHex(colorHex);
+
+                attributeService.syncAttributes(v, color, colorHex, size);
 
                 // Apply new images if uploaded
                 if (image1 != null || image2 != null || image3 != null || image4 != null || image5 != null) {
@@ -428,10 +443,8 @@ public class AdminProductController {
                     v.setPrice(price);
                 if (quantity != null)
                     v.setQuantity(quantity);
-                if (color != null)
-                    v.setColor(color);
-                if (colorHex != null)
-                    v.setColorHex(colorHex);
+
+                attributeService.syncAttributes(v, color, colorHex, null);
                 if (image1 != null || image2 != null || image3 != null || image4 != null || image5 != null) {
                     v.getImages().clear();
                     handleImages(v, image1, image2, image3, image4, image5);

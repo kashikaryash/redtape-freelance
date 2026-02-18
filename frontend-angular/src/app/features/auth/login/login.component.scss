@@ -212,12 +212,13 @@
   }
 
   .mdc-notched-outline {
-    display: none;
+    display: block;
+    /* Restore border */
   }
 
   &.mat-focused .mat-mdc-text-field-wrapper {
     background-color: var(--surface-elevated) !important;
-    box-shadow: 0 0 0 2px var(--primary) !important;
+    border-color: var(--primary) !important;
   }
 }
 
