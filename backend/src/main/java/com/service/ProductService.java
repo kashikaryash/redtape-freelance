@@ -81,7 +81,16 @@ public class ProductService {
     }
 
     public List<Product> getProductsByModerator(Long userId) {
-        return productRepository.findByModerator_UserId(Objects.requireNonNull(userId, "User ID is required"));
+        if (userId == null) {
+            return new ArrayList<>();
+        }
+        try {
+            return productRepository.findByModerator_UserId(userId);
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(ProductService.class)
+                    .error("Error fetching products for moderator userId={}: {}", userId, e.getMessage(), e);
+            throw e;
+        }
     }
 
     public Product getProductByModelNo(Long modelNo) {

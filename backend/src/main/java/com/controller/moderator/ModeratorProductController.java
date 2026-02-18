@@ -23,7 +23,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/moderator/products")
-@PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+@PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYEE')")
 @org.springframework.transaction.annotation.Transactional(readOnly = true)
 public class ModeratorProductController {
 
