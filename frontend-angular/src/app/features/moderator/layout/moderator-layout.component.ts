@@ -36,7 +36,7 @@ import { AuthService } from '../../../core/services/auth.service';
         
         <div class="nav-right">
           
-          <a mat-button routerLink="/moderator/employees" class="nav-link" *ngIf="auth.user()?.role !== 'EMPLOYEE'">
+          <a mat-button routerLink="/moderator/employees" class="nav-link" *ngIf="auth.user()?.role === 'ADMIN'">
             <mat-icon>group</mat-icon>
             Team
           </a>
