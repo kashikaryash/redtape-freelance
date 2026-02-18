@@ -461,6 +461,12 @@ public class ProductService {
 
             variant.setPrice(vDto.getPrice());
             variant.setQuantity(vDto.getQuantity());
+
+            // Sync both attribute system and legacy DB columns
+            variant.setColor(vDto.getColor());
+            variant.setColorHex(vDto.getColorHex());
+            variant.setSize(vDto.getSize());
+
             attributeService.syncAttributes(variant, vDto.getColor(), vDto.getColorHex(), vDto.getSize());
             variant.setSku(vDto.getSku());
             variant.setStyleCode(vDto.getStyleCode());
