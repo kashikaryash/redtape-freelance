@@ -47,7 +47,7 @@ public class WishlistMapper {
             }
 
             if (url != null && url.startsWith("/")) {
-                url = "https://zestful-recreation-production.up.railway.app" + url;
+                // Keep relative to serve via proxy correctly
             }
             dto.setImageUrl(url);
 

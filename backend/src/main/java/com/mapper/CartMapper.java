@@ -38,7 +38,7 @@ public class CartMapper {
                 }
 
                 if (imageUrl != null && imageUrl.startsWith("/")) {
-                        imageUrl = "https://zestful-recreation-production.up.railway.app" + imageUrl;
+                        // Keep relative to serve via proxy correctly
                 }
 
                 ProductSummaryDTO productDTO = new ProductSummaryDTO(

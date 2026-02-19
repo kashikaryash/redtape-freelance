@@ -81,7 +81,7 @@ public class ProductController {
                 if (!v.getImages().isEmpty()) {
                     String url = v.getImages().get(0).getImageUrl();
                     if (url != null && url.startsWith("/")) {
-                        url = "https://zestful-recreation-production.up.railway.app" + url;
+                        // Keep relative to serve via proxy correctly
                     }
                     dto.setImage1(url);
                 }
