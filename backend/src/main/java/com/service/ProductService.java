@@ -262,8 +262,7 @@ public class ProductService {
                     if (!v.getImages().isEmpty()) {
                         String url = v.getImages().get(0).getImageUrl();
                         if (url != null && url.startsWith("/")) {
-                            // Use the correct backend URL for production images
-                            url = url; // Keep relative to serve via proxy correctly
+                            // Keep relative to serve via proxy correctly
                         }
                         dto.setImageUrl(url);
                     }
