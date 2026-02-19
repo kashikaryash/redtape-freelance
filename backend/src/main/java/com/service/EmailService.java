@@ -87,6 +87,7 @@ public class EmailService {
                 "</div>";
     }
 
+    @Async
     public void sendOtpEmail(String to, String otp) {
         String subject = "Your Verification Code - SnapCart";
         String body = getHeader() +
@@ -104,6 +105,7 @@ public class EmailService {
         sendEmail(to, subject, body);
     }
 
+    @Async
     public void sendWelcomeEmail(String to, String name) {
         String subject = "Welcome to SnapCart!";
         String body = getHeader() +
@@ -122,6 +124,7 @@ public class EmailService {
         sendEmail(to, subject, body);
     }
 
+    @Async
     public void sendEmployeeWelcomeEmail(String to, String name, String password, String moderatorName) {
         String subject = "You've been added to the SnapCart Team!";
         String body = getHeader() +
@@ -145,6 +148,7 @@ public class EmailService {
         sendEmail(to, subject, body);
     }
 
+    @Async
     public void sendOrderConfirmation(String to, String orderId, byte[] invoicePdf) {
         String subject = "Order Confirmed! #" + orderId;
         String body = getHeader() +
@@ -177,6 +181,7 @@ public class EmailService {
         sendOrderConfirmation(to, orderId, null);
     }
 
+    @Async
     public void sendOrderStatusUpdate(String to, String orderId, String status, String customerName) {
         String statusEmoji = getStatusEmoji(status);
         String statusColor = getStatusColor(status);
@@ -244,6 +249,7 @@ public class EmailService {
         return status.substring(0, 1).toUpperCase() + status.substring(1).toLowerCase();
     }
 
+    @Async
     public void sendOrderTrackingUpdate(String to, String orderId, String status, String location,
             String customerName) {
         String statusEmoji = "📍";

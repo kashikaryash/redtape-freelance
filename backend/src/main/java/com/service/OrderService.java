@@ -312,8 +312,17 @@ public class OrderService {
         order.setCurrentLocation(location);
 
         // Add to tracking history
-        TrackingStatus trackingStatus = TrackingStatus.valueOf(status.name());
-        OrderTracking tracking = new OrderTracking(order, trackingStatus, location, "", "Update via old endpoint");
+        TrackingStatus trackingStatus;
+        try {
+            trackingStatus = TrackingStatus.valueOf(status.name());
+        } catch (IllegalArgumentException e) {
+            // Fallback for statuses that don't match exactly
+            trackingStatus = switch (status) {
+                case PENDING -> TrackingStatus.ORDER_CONFIRMED;
+                default -> TrackingStatus.SHIPPED;
+            };
+        }
+        OrderTracking tracking = new OrderTracking(order, trackingStatus, location, "", "Update via Admin Portal");
         order.getTrackingHistory().add(tracking); // Cascaded
                                                   // save
 

@@ -263,7 +263,7 @@ public class ProductService {
                         String url = v.getImages().get(0).getImageUrl();
                         if (url != null && url.startsWith("/")) {
                             // Use the correct backend URL for production images
-                            url = "https://loyal-benevolence-production.up.railway.app" + url;
+                            url = url; // Keep relative to serve via proxy correctly
                         }
                         dto.setImageUrl(url);
                     }
