@@ -8,14 +8,14 @@
 }
 
 .footer-container {
-    max-width: 1200px;
+    max-width: 1440px;
     margin: 0 auto;
-    padding: 0 1.5rem;
+    padding: 0 2rem;
 }
 
 .footer-content {
     display: grid;
-    grid-template-columns: 1.5fr 1fr 1fr 2fr;
+    grid-template-columns: 1fr 1fr 1fr 1.5fr;
     gap: 1.5rem;
     margin-bottom: 1.5rem;
 }
@@ -47,8 +47,10 @@
 }
 
 .brand-description {
-    display: none;
-    /* Hide to save significant space */
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    margin: 0;
 }
 
 /* Footer Sections */
@@ -116,6 +118,8 @@
     outline: none;
     transition: all 0.3s ease;
     flex-grow: 1;
+    height: 40px;
+    box-sizing: border-box;
 }
 
 .newsletter-input::placeholder {
@@ -131,11 +135,14 @@
     background: var(--primary) !important;
     color: white !important;
     font-weight: 600;
-    padding: 0.5rem 1rem !important;
+    padding: 0 1rem !important;
     font-size: 0.75rem !important;
     border-radius: 4px;
     transition: all 0.3s ease;
     white-space: nowrap;
+    height: 40px !important;
+    line-height: 40px !important;
+    box-sizing: border-box;
 }
 
 .newsletter-button:hover {

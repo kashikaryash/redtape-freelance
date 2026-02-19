@@ -53,7 +53,7 @@
     <div class="category-strip">
         <div class="container nav-container">
             <div class="category-nav">
-                @for (category of categories; track category) {
+                @for (category of mainCategories; track category) {
                 <div class="nav-item" (mouseenter)="setHovered(category)" (mouseleave)="setHovered(null)">
                     <a [routerLink]="getCategoryPath(category)" class="nav-link">
                         {{ getCategoryLabel(category) }}
@@ -147,36 +147,29 @@
                                     <li><a routerLink="/cat/KIDS/DRESSES">Girls Dresses</a></li>
                                 </ul>
                             </div>
-                            } @else if (category === 'ACCESSORIES') {
-                            <div class="menu-col">
-                                <h3 class="menu-title">WATCHES & MORE</h3>
-                                <ul>
-                                    <li><a routerLink="/cat/ACCESSORIES/WATCHES">Watches</a></li>
-                                    <li><a routerLink="/cat/ACCESSORIES/SUNGLASSES">Sunglasses</a></li>
-                                </ul>
-                            </div>
-                            } @else if (category === 'JEWELLERY') {
-                            <div class="menu-col">
-                                <h3 class="menu-title">FINE JEWELLERY</h3>
-                                <ul>
-                                    <li><a routerLink="/cat/JEWELLERY/NECKLACES">Necklaces</a></li>
-                                    <li><a routerLink="/cat/JEWELLERY/EARRINGS">Earrings</a></li>
-                                </ul>
-                            </div>
-                            } @else if (category === 'BAGS_FOOTWEAR') {
-                            <div class="menu-col">
-                                <h3 class="menu-title">BAGS</h3>
-                                <ul>
-                                    <li><a routerLink="/cat/BAGS_FOOTWEAR/HANDBAGS">Handbags</a></li>
-                                    <li><a routerLink="/cat/BAGS_FOOTWEAR/BACKPACKS">Backpacks</a></li>
-                                </ul>
-                            </div>
                             }
                         </div>
                     </div>
                     }
                 </div>
                 }
+
+                <!-- More Dropdown -->
+                <div class="nav-item more-dropdown" (mouseenter)="setMoreOpen(true)" (mouseleave)="setMoreOpen(false)">
+                    <span class="nav-link more-link">
+                        MORE
+                        <mat-icon class="more-icon">expand_more</mat-icon>
+                    </span>
+                    @if (moreDropdownOpen()) {
+                    <div class="more-menu">
+                        @for (cat of moreCategories; track cat) {
+                        <a [routerLink]="getCategoryPath(cat)" class="more-menu-item">
+                            {{ getCategoryLabel(cat) }}
+                        </a>
+                        }
+                    </div>
+                    }
+                </div>
             </div>
         </div>
     </div>
@@ -225,6 +218,46 @@
         </button>
     </div>
     <div class="drawer-content">
+        <!-- User Profile Section -->
+        @if (user()) {
+        <div class="mobile-user-section">
+            <div class="mobile-user-info">
+                <mat-icon class="mobile-user-avatar">account_circle</mat-icon>
+                <div>
+                    <span class="mobile-user-name">{{ user().name }}</span>
+                    <span class="mobile-user-email">{{ user().email }}</span>
+                </div>
+            </div>
+            <a routerLink="/my-profile" (click)="toggleMobileMenu()" class="mobile-profile-link">
+                <mat-icon>person</mat-icon> My Profile
+            </a>
+            <a routerLink="/my-orders" (click)="toggleMobileMenu()" class="mobile-profile-link">
+                <mat-icon>shopping_bag</mat-icon> My Orders
+            </a>
+            <a routerLink="/wishlist" (click)="toggleMobileMenu()" class="mobile-profile-link">
+                <mat-icon>favorite_border</mat-icon> Wishlist
+            </a>
+            @if (primaryRole() === 'ADMIN' || primaryRole() === 'SUPER_ADMIN') {
+            <a routerLink="/admin/dashboard" (click)="toggleMobileMenu()" class="mobile-profile-link">
+                <mat-icon>admin_panel_settings</mat-icon> Admin Dashboard
+            </a>
+            }
+            <button class="mobile-profile-link logout-link" (click)="logout()">
+                <mat-icon>logout</mat-icon> Sign Out
+            </button>
+        </div>
+        } @else {
+        <div class="mobile-user-section">
+            <a routerLink="/login" (click)="toggleMobileMenu()" class="mobile-profile-link">
+                <mat-icon>login</mat-icon> Sign In
+            </a>
+            <a routerLink="/signup" (click)="toggleMobileMenu()" class="mobile-profile-link">
+                <mat-icon>person_add</mat-icon> Create Account
+            </a>
+        </div>
+        }
+
+        <!-- Category Navigation -->
         @for (cat of categories; track cat) {
         <div class="mobile-nav-item">
             <div class="nav-expand-header">

@@ -247,6 +247,7 @@ h2 {
     background-color: var(--background);
     overflow-x: hidden;
     min-height: 100vh;
+    padding-bottom: 80px;
 }
 
 /* Horizontal Scroller */
@@ -310,13 +311,20 @@ h2 {
     }
 
     .view-all-btn {
-        background: #2874f0;
+        background: var(--primary);
         color: #ffffff;
         font-weight: 600;
         font-size: 0.85rem;
         padding: 6px 20px;
-        border-radius: 2px;
+        border-radius: 8px;
         box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+        border: none;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
     }
 }
 
@@ -326,6 +334,10 @@ h2 {
     gap: 12px;
     margin-bottom: 1.5rem;
     flex-wrap: wrap;
+
+    @media (max-width: 991px) {
+        display: none;
+    }
 }
 
 .filter-chip {

@@ -123,7 +123,7 @@ import { environment } from '../../../../environments/environment';
     .image-container { 
       position: relative; 
       padding-top: 100%; /* 1:1 Aspect Ratio */
-      background: var(--border-light); 
+      background: transparent; 
       overflow: hidden; 
     }
     .product-img { 
@@ -137,7 +137,6 @@ import { environment } from '../../../../environments/environment';
         height: auto;
         object-fit: contain; 
         transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1); 
-        mix-blend-mode: multiply;
     }
     .product-card:hover .product-img {
         transform: translate(-50%, -50%) scale(1.05);

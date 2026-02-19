@@ -48,9 +48,14 @@ export class NavbarComponent {
     wishlistCount = this.wishlist.wishlistCount;
 
     hoveredCategory = signal<string | null>(null);
+    moreDropdownOpen = signal(false);
 
     setHovered(category: string | null) {
         this.hoveredCategory.set(category);
+    }
+
+    setMoreOpen(open: boolean) {
+        this.moreDropdownOpen.set(open);
     }
 
     // Mobile Menu Logic
@@ -81,6 +86,15 @@ export class NavbarComponent {
         'MEN', 'WOMEN', 'KIDS', 'ELECTRONICS',
         'HOME_KITCHEN', 'BEAUTY', 'ACCESSORIES',
         'JEWELLERY', 'BAGS_FOOTWEAR'
+    ];
+
+    mainCategories = [
+        'MEN', 'WOMEN', 'KIDS', 'ELECTRONICS',
+        'HOME_KITCHEN', 'BEAUTY'
+    ];
+
+    moreCategories = [
+        'ACCESSORIES', 'JEWELLERY', 'BAGS_FOOTWEAR'
     ];
 
     getCategoryPath(category: string): string {

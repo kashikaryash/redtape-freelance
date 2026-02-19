@@ -18,7 +18,7 @@
 .container {
     max-width: 1440px;
     margin: 0 auto;
-    padding: 0 1.5rem;
+    padding: 0 2rem;
     display: flex;
     align-items: center;
 }
@@ -101,6 +101,7 @@
 .user-control {
     margin-left: 12px;
     padding-left: 12px;
+    padding-right: 0.5rem;
     border-left: 1px solid rgba(255, 255, 255, 0.2);
 
     .auth-guest {
@@ -155,7 +156,7 @@
 .category-nav {
     display: flex;
     height: 100%;
-    gap: 3rem;
+    gap: 1.5rem;
 }
 
 .nav-item {
@@ -194,6 +195,62 @@
         &:hover::after {
             width: 100%;
         }
+    }
+}
+
+/* More Dropdown */
+.more-dropdown {
+    position: relative;
+}
+
+.more-link {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+    user-select: none;
+
+    .more-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        transition: transform 0.2s;
+    }
+}
+
+.more-dropdown:hover .more-icon {
+    transform: rotate(180deg);
+}
+
+.more-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    min-width: 180px;
+    padding: 0.5rem 0;
+    z-index: 1101;
+    animation: menuFade 0.2s ease;
+}
+
+.more-menu-item {
+    display: block;
+    padding: 0.65rem 1.25rem;
+    text-decoration: none;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.15s ease;
+
+    &:hover {
+        background: var(--border-light);
+        color: var(--primary);
+        padding-left: 1.5rem;
     }
 }
 
@@ -275,22 +332,111 @@
 
 @media (max-width: 991px) {
     .top-bar {
-        height: 70px;
+        height: 56px;
 
         .actions-container {
-            grid-template-columns: auto 1fr auto;
-            gap: 1rem;
+            grid-template-columns: auto 1fr auto auto;
+            gap: 0.5rem;
         }
     }
 
-    .search-central,
-    .category-strip,
+    .search-central {
+        display: none;
+    }
+
+    /* Keep user-control visible but compact */
     .user-control {
+        margin-left: 4px;
+        padding-left: 4px;
+        border-left: none;
+
+        .user-name {
+            display: none;
+        }
+
+        .user-btn {
+            min-width: auto !important;
+            padding: 0 4px !important;
+        }
+
+        .auth-guest {
+            .login-link {
+                font-size: 0.8rem;
+                min-width: auto !important;
+                padding: 0 6px !important;
+            }
+
+            .join-btn {
+                font-size: 0.75rem;
+                padding: 0 0.75rem !important;
+                height: 30px;
+                line-height: 30px;
+            }
+        }
+    }
+
+    /* Convert category strip to horizontal scrollable bar on mobile */
+    .category-strip {
+        height: auto;
+        padding: 0;
+        overflow: hidden;
+
+        .nav-container {
+            padding: 0 0.75rem;
+        }
+    }
+
+    .category-nav {
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        gap: 0;
+        padding: 0.5rem 0;
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+    }
+
+    .nav-item {
+        .nav-link {
+            font-size: 0.75rem;
+            white-space: nowrap;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: var(--border-light);
+            margin: 0 3px;
+            letter-spacing: 0;
+            font-weight: 600;
+
+            &::after {
+                display: none;
+            }
+
+            &:hover {
+                background: var(--primary);
+                color: white;
+            }
+        }
+    }
+
+    /* Hide mega menu and More dropdown on mobile */
+    .mega-menu,
+    .more-dropdown {
         display: none;
     }
 
     .mobile-menu-btn {
         display: block;
+    }
+
+    /* Hide action icons except profile on very small screens */
+    .action-icons {
+        gap: 0.25rem;
+
+        button[routerLink="/wishlist"] {
+            display: none;
+        }
     }
 }
 
@@ -322,6 +468,8 @@
 
 .drawer-content {
     padding: 1rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 80px);
 
     .mobile-nav-item {
         border-bottom: 1px solid var(--border-light);
@@ -343,6 +491,82 @@
                 text-decoration: none;
                 color: var(--text-secondary);
             }
+        }
+    }
+}
+
+/* Mobile User Section */
+.mobile-user-section {
+    padding: 0 0.5rem 1rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 2px solid var(--border);
+
+    .mobile-user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0.5rem 0 1rem;
+
+        .mobile-user-avatar {
+            font-size: 40px;
+            width: 40px;
+            height: 40px;
+            color: var(--primary);
+        }
+
+        .mobile-user-name {
+            display: block;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+
+        .mobile-user-email {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+    }
+}
+
+.mobile-profile-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.6rem 0.5rem;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.15s ease;
+    background: none;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    text-align: left;
+
+    mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        color: var(--text-muted);
+    }
+
+    &:hover {
+        background: var(--border-light);
+        color: var(--primary);
+
+        mat-icon {
+            color: var(--primary);
+        }
+    }
+
+    &.logout-link {
+        color: #ef4444;
+
+        mat-icon {
+            color: #ef4444;
         }
     }
 }
